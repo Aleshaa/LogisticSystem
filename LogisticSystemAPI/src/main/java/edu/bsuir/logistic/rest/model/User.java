@@ -1,5 +1,6 @@
 package edu.bsuir.logistic.rest.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -7,15 +8,17 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "User")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idUser", unique = true, nullable = false)
     private Integer idUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idRole", nullable = false)
-    private String idRole;
+    private Role role;
 
     @NotEmpty
     @Column(name = "name", nullable = false)
@@ -30,7 +33,7 @@ public class User implements Serializable {
     private String phone;
 
     @NotEmpty
-    @Column(name = "phone", nullable = false)
+    @Column(name = "about", nullable = false)
     private String about;
 
     @NotEmpty
@@ -41,10 +44,14 @@ public class User implements Serializable {
     @Column(name = "Password", nullable = false)
     private String password;
 
-    public User(Integer idUser, String idRole, String name, String email, String phone, String about, String username,
+    public User() {
+        idUser = 0;
+    }
+
+    public User(Integer idUser, Role role, String name, String email, String phone, String about, String username,
                 String password) {
         this.idUser = idUser;
-        this.idRole = idRole;
+        this.role = role;
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -60,14 +67,6 @@ public class User implements Serializable {
 
     public void setIdUser(Integer idUser) {
         this.idUser = idUser;
-    }
-
-    public String getIdRole() {
-        return idRole;
-    }
-
-    public void setIdRole(String idRole) {
-        this.idRole = idRole;
     }
 
     public String getName() {
@@ -116,5 +115,13 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

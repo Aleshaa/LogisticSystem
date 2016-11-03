@@ -24,6 +24,16 @@ public class UserServiceImpl implements UserService {
         return dao.findById(id);
     }
 
+    @Override
+    public User findByUsername(String username) {
+        return dao.findByUsername(username);
+    }
+
+    @Override
+    public boolean isUserExist(User user) {
+        return dao.findByUsername(user.getUsername()) != null;
+    }
+
     public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         dao.save(user);
@@ -36,7 +46,7 @@ public class UserServiceImpl implements UserService {
             if (!user.getPassword().equals(entity.getPassword())) {
                 entity.setPassword(passwordEncoder.encode(user.getPassword()));
             }
-            entity.setIdRole(user.getIdRole());
+            entity.setRole(user.getRole());
             entity.setName(user.getName());
             entity.setEmail(user.getEmail());
             entity.setPhone(user.getPhone());
@@ -45,8 +55,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(String id) {
+    public void deleteUserById(int id) {
         dao.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll() {
+        dao.deleteAll();
     }
 
     public List<User> findAllUsers() {

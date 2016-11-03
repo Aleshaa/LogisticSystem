@@ -1,6 +1,7 @@
 package edu.bsuir.logistic.rest.dao;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,11 @@ public abstract class AbstractDao<PK extends Serializable, T> {
         return (T) getSession().get(persistentClass, key);
     }
 
+    @SuppressWarnings("unchecked")
+    public T getByName(String key) {
+        return (T) getSession().get(persistentClass, key);
+    }
+
     public void persist(T entity) {
         getSession().persist(entity);
     }
@@ -46,4 +52,11 @@ public abstract class AbstractDao<PK extends Serializable, T> {
         return getSession().createCriteria(persistentClass);
     }
 
+    protected Criteria createQueryCriteria(String query) {
+        return getSession().createCriteria(query);
+    }
+
+    protected Query createQuery(String query) {
+        return getSession().createQuery(query);
+    }
 }

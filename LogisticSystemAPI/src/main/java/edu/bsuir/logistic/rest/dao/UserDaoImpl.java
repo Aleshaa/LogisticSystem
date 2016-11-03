@@ -1,11 +1,10 @@
 package edu.bsuir.logistic.rest.dao;
 
 import edu.bsuir.logistic.rest.model.User;
+import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,12 +13,18 @@ import java.util.List;
 @Repository("userDao")
 public class UserDaoImpl extends AbstractDao<Integer, User> implements UserDao {
 
-    static final Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
+    private static final Logger LOGGER = Logger.getLogger(UserDaoImpl.class);
 
-    public User findById(int id) {
+    public User findById(Integer id) {
         User user = getByKey(id);
 
         return user;
+    }
+
+    public User findByUsername(String username) {
+        Criteria crit = createEntityCriteria();
+        crit.add(Restrictions.eq("username", username));
+        return (User) crit.uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
@@ -36,11 +41,17 @@ public class UserDaoImpl extends AbstractDao<Integer, User> implements UserDao {
     }
 
     @Override
-    public void deleteById(String id) {
+    public void deleteById(Integer id) {
         Criteria crit = createEntityCriteria();
         crit.add(Restrictions.eq("idUser", id));
         User user = (User) crit.uniqueResult();
         delete(user);
+    }
+
+    @Override
+    public void deleteAll() {
+        String hql = "DELETE FROM User";
+        createQuery(hql).executeUpdate();
     }
 
 }
