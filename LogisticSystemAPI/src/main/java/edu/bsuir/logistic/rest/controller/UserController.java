@@ -38,7 +38,7 @@ public class UserController {
 
     //-------------------Retrieve Single User--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/user/{id}", method = RequestMethod.GET, produces = {MediaType
+    @RequestMapping(value = "/rest/user/get/{id}", method = RequestMethod.GET, produces = {MediaType
             .APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<User> getUser(@PathVariable("id") int id) {
         System.out.println("Fetching User with id " + id);
@@ -72,7 +72,7 @@ public class UserController {
 
     //------------------- Update a User --------------------------------------------------------
 
-    @RequestMapping(value = "/rest/user/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/rest/user/update/{id}", method = RequestMethod.PUT)
     public ResponseEntity<User> updateUser(@PathVariable("id") int id, @RequestBody User user) {
         System.out.println("Updating User " + id);
 
