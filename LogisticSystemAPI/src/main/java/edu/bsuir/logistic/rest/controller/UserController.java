@@ -26,7 +26,8 @@ public class UserController {
 
     //-------------------Retrieve All Users--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/users", method = RequestMethod.GET)
+    @RequestMapping(value = "/rest/users", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
     public ResponseEntity<List<User>> listAllUsers() {
         List<User> users = userService.findAllUsers();
         if (users.isEmpty()) {
@@ -38,8 +39,8 @@ public class UserController {
 
     //-------------------Retrieve Single User--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/user/get/{id}", method = RequestMethod.GET, produces = {MediaType
-            .APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @RequestMapping(value = "/rest/user/get/{id}", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
     public ResponseEntity<User> getUser(@PathVariable("id") int id) {
         System.out.println("Fetching User with id " + id);
         User user = userService.findById(id);
@@ -83,7 +84,11 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        currentUser = user;
+        currentUser.setName(user.getName());
+        currentUser.setAbout(user.getAbout());
+        currentUser.setPhone(user.getPhone());
+        currentUser.setEmail(user.getEmail());
+        currentUser.setPassword(user.getPassword());
 
         userService.updateUser(currentUser);
         return new ResponseEntity<>(currentUser, HttpStatus.OK);

@@ -27,7 +27,7 @@ public class Role implements Serializable {
     @Column(name = "NameRole", nullable = false)
     private String nameRole;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "role")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "role")
     @Fetch(FetchMode.SELECT)
     private Set<User> users;
 

@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -40,7 +41,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/users").hasRole("ADMIN")
                 .antMatchers("/rest/user/delete/**").hasRole("ADMIN")
                 .antMatchers("/rest/user/get/**").hasRole("ADMIN")
-                .and().httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint());
+                .and().httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())
+                .and().csrf().disable()
+                .exceptionHandling()
+                .and()
+                .authorizeRequests()
+                .and()
+                .formLogin()
+                .failureHandler(new SimpleUrlAuthenticationFailureHandler())
+                .and()
+                .logout();
     }
 
     @Bean
