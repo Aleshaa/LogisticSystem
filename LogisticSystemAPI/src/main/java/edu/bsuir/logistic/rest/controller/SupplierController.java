@@ -75,7 +75,7 @@ public class SupplierController {
     //------------------- Update a Supplier --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/supplier/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Supplier> updateSupplier(@PathVariable("id") int id, @RequestBody Supplier supplier) {
+    public ResponseEntity<Void> updateSupplier(@PathVariable("id") int id, @RequestBody Supplier supplier) {
         System.out.println("Updating Supplier " + id);
 
         Supplier currentSupplier = supplierService.findById(id);
@@ -91,7 +91,7 @@ public class SupplierController {
         currentSupplier.setAbout(supplier.getAbout());
 
         supplierService.updateSupplier(currentSupplier);
-        return new ResponseEntity<>(currentSupplier, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //------------------- Delete a Address --------------------------------------------------------

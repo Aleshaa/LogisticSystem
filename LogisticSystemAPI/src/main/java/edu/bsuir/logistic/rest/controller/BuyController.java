@@ -70,7 +70,7 @@ public class BuyController {
     //------------------- Update a Buy --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/buy/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Buy> updateBuy(@PathVariable("id") int id, @RequestBody Buy buy) {
+    public ResponseEntity<Void> updateBuy(@PathVariable("id") int id, @RequestBody Buy buy) {
         System.out.println("Updating Buy " + id);
 
         Buy currentBuy = buyService.findById(id);
@@ -83,7 +83,7 @@ public class BuyController {
         currentBuy.setQuantity(buy.getQuantity());
 
         buyService.updateBuy(currentBuy);
-        return new ResponseEntity<>(currentBuy, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //------------------- Delete a Buy --------------------------------------------------------

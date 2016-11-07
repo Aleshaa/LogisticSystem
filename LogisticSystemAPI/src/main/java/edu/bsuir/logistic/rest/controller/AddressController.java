@@ -3,6 +3,7 @@ package edu.bsuir.logistic.rest.controller;
 import edu.bsuir.logistic.rest.model.Address;
 import edu.bsuir.logistic.rest.model.User;
 import edu.bsuir.logistic.rest.service.AddressService;
+import edu.bsuir.logistic.rest.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +25,9 @@ public class AddressController {
 
     @Autowired
     AddressService addressService;
+
+    @Autowired
+    UserService userService;
 
     //-------------------Retrieve All Addresses--------------------------------------------------------
 
@@ -55,11 +59,13 @@ public class AddressController {
 
     //-------------------Create a Address--------------------------------------------------------
 
-    @RequestMapping(value = "/address", method = RequestMethod.POST)
-    public ResponseEntity<Void> createAddress(@RequestBody Address address, UriComponentsBuilder ucBuilder) {
+    @RequestMapping(value = "/address/{id}", method = RequestMethod.POST)
+    public ResponseEntity<Void> createAddress(@PathVariable("id") int id, @RequestBody Address address,
+                                              UriComponentsBuilder ucBuilder) {
         System.out.println("Creating Address " + address.getCity() + " " + address.getStreet() + " "
                 + address.getNumber());
 
+        address.setUser(userService.findById(id));
         addressService.saveAddress(address);
 
         HttpHeaders headers = new HttpHeaders();
@@ -71,7 +77,7 @@ public class AddressController {
     //------------------- Update a Address --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/address/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Address> updateAddress(@PathVariable("id") int id, @RequestBody Address address) {
+    public ResponseEntity<Void> updateAddress(@PathVariable("id") int id, @RequestBody Address address) {
         System.out.println("Updating Address " + id);
 
         Address currentAddress = addressService.findById(id);
@@ -87,7 +93,7 @@ public class AddressController {
         currentAddress.setNumber(address.getNumber());
 
         addressService.updateAddress(currentAddress);
-        return new ResponseEntity<>(currentAddress, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //------------------- Delete a Address --------------------------------------------------------

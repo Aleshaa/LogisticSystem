@@ -1,9 +1,9 @@
 package edu.bsuir.logistic.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -19,19 +19,19 @@ public class Purchase implements Serializable {
     @Column(name = "idPurchase", unique = true, nullable = false)
     private Integer idPurchase;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "idGoods", nullable = false)
     private Goods goods;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "idClient", nullable = false)
     private User client;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "frequency", nullable = false)
     private int frequency;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "quantity", nullable = false)
     private float quantity;
 

@@ -70,7 +70,7 @@ public class GoodsController {
     //------------------- Update a Goods --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/goods/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Goods> updateGoods(@PathVariable("id") int id, @RequestBody Goods goods) {
+    public ResponseEntity<Void> updateGoods(@PathVariable("id") int id, @RequestBody Goods goods) {
         System.out.println("Updating Goods " + id);
 
         Goods currentGoods = goodsService.findById(id);
@@ -86,7 +86,7 @@ public class GoodsController {
         currentGoods.setAbout(goods.getAbout());
 
         goodsService.updateGoods(currentGoods);
-        return new ResponseEntity<>(currentGoods, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //------------------- Delete a Goods --------------------------------------------------------

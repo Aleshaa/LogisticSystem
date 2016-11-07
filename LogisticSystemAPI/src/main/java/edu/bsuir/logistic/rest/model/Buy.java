@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -21,11 +22,11 @@ public class Buy implements Serializable {
     @Column(name = "idBuy", unique = true, nullable = false)
     private Integer idBuy;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "idGoods", nullable = false)
     private Goods goods;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "idClient", nullable = false)
     private User client;
 
@@ -34,7 +35,7 @@ public class Buy implements Serializable {
     @Type(type = "date")
     private Date date;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "quantity", nullable = false)
     private float quantity;
 

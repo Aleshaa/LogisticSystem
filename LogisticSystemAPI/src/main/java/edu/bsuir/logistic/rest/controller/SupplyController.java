@@ -70,7 +70,7 @@ public class SupplyController {
     //------------------- Update a Supply --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/supply/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Supply> updateSupply(@PathVariable("id") int id, @RequestBody Supply supply) {
+    public ResponseEntity<Void> updateSupply(@PathVariable("id") int id, @RequestBody Supply supply) {
         System.out.println("Updating Supply " + id);
 
         Supply currentSupply = supplyService.findById(id);
@@ -83,7 +83,7 @@ public class SupplyController {
         currentSupply.setQuantity(supply.getQuantity());
 
         supplyService.updateSupply(currentSupply);
-        return new ResponseEntity<>(currentSupply, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //------------------- Delete a Supplies --------------------------------------------------------

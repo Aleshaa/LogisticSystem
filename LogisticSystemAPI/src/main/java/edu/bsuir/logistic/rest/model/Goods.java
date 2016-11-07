@@ -7,6 +7,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,11 +32,11 @@ public class Goods implements Serializable {
     @Column(name = "about", nullable = true)
     private String about;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "quantity", nullable = false)
     private float quantity;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "price", nullable = false)
     private float price;
 
@@ -46,15 +47,15 @@ public class Goods implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "idAddress")})
     private Set<Address> addressSet = new HashSet<Address>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "goods")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "goods")
     @Fetch(FetchMode.JOIN)
     private Set<Buy> buySet;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "goods")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "goods")
     @Fetch(FetchMode.JOIN)
     private Set<Purchase> purchases;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "goods")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "goods")
     @Fetch(FetchMode.JOIN)
     private Set<Supply> supplies;
 

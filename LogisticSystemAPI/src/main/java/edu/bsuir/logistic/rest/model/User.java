@@ -20,7 +20,7 @@ public class User implements Serializable {
     @Column(name = "idUser", unique = true, nullable = false)
     private Integer idUser;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "idRole", nullable = false)
     private Role role;
 
@@ -48,15 +48,15 @@ public class User implements Serializable {
     @Column(name = "Password", nullable = false)
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "user")
     @Fetch(FetchMode.JOIN)
     private Set<Address> addressSet;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "client")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "client")
     @Fetch(FetchMode.JOIN)
     private Set<Buy> buySet;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "client")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "client")
     @Fetch(FetchMode.JOIN)
     private Set<Purchase> purchases;
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,12 +18,14 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Address implements Serializable {
 
+    private static final long serialVersionUID = -7788619177798333712L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idAddress", unique = true, nullable = false)
     private Integer idAddress;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "idUser", nullable = true)
     private User user;
 
@@ -38,11 +41,10 @@ public class Address implements Serializable {
     @Column(name = "Street", nullable = false)
     private String Street;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "Number", nullable = false)
     private int Number;
 
-    @NotEmpty
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "m2m_goods_address",
             joinColumns = {@JoinColumn(name = "idAddress")},

@@ -74,7 +74,7 @@ public class UserController {
     //------------------- Update a User --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/user/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<User> updateUser(@PathVariable("id") int id, @RequestBody User user) {
+    public ResponseEntity<Void> updateUser(@PathVariable("id") int id, @RequestBody User user) {
         System.out.println("Updating User " + id);
 
         User currentUser = userService.findById(id);
@@ -91,7 +91,7 @@ public class UserController {
         currentUser.setPassword(user.getPassword());
 
         userService.updateUser(currentUser);
-        return new ResponseEntity<>(currentUser, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //------------------- Delete a User --------------------------------------------------------

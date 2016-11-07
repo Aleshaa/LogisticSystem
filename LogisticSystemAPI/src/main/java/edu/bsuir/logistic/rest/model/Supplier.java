@@ -39,7 +39,7 @@ public class Supplier implements Serializable {
     @Column(name = "about", nullable = false)
     private String about;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "supplier")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "supplier")
     @Fetch(FetchMode.JOIN)
     private Set<Supply> supplies;
 
