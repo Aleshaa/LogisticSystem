@@ -79,16 +79,12 @@ CREATE TABLE IF NOT EXISTS `Supplier` (
   COLLATE = utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `Goods` (
-  `idGoods`    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idSupplier` INT UNSIGNED,
-  `name`       VARCHAR(50)  NOT NULL,
-  `about`      VARCHAR(200),
-  `quantity`   FLOAT        NOT NULL,
-  `price`      FLOAT        NOT NULL,
+  `idGoods`  INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name`     VARCHAR(50)  NOT NULL,
+  `about`    VARCHAR(200),
+  `quantity` FLOAT        NOT NULL,
+  `price`    FLOAT        NOT NULL,
   UNIQUE INDEX `idGoods_UNIQUE` (`idGoods` ASC),
-  CONSTRAINT `idSupplierGoods` FOREIGN KEY (`idSupplier`) REFERENCES `Supplier` (`idSupplier`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
   PRIMARY KEY (`idGoods`)
 )
   ENGINE = InnoDB
@@ -96,31 +92,28 @@ CREATE TABLE IF NOT EXISTS `Goods` (
   COLLATE = utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `m2m_goods_address` (
-  `id`        INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `idGoods`   INT UNSIGNED NOT NULL,
   `idAddress` INT UNSIGNED NOT NULL,
-  `quantity`  FLOAT        NOT NULL,
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
   CONSTRAINT `idGoods` FOREIGN KEY (`idGoods`) REFERENCES `Goods` (`idGoods`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `idAddress` FOREIGN KEY (`idAddress`) REFERENCES `Address` (`idAddress`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`idGoods`, `idAddress`)
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET = utf8
   COLLATE = utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `Supply` (
-  `idSupply`      INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idGoodsSupply` INT UNSIGNED NOT NULL,
-  `idSupplier`    INT UNSIGNED NOT NULL,
-  `date`          DATE         NOT NULL,
-  `quantity`      FLOAT        NOT NULL,
+  `idSupply`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idGoods`    INT UNSIGNED NOT NULL,
+  `idSupplier` INT UNSIGNED NOT NULL,
+  `date`       DATE         NOT NULL,
+  `quantity`   FLOAT        NOT NULL,
   UNIQUE INDEX `idSupply_UNIQUE` (`idSupply` ASC),
-  CONSTRAINT `idGoodsSupply` FOREIGN KEY (`idGoodsSupply`) REFERENCES `Goods` (`idGoods`)
+  CONSTRAINT `idGoodsSupply` FOREIGN KEY (`idGoods`) REFERENCES `Goods` (`idGoods`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `idSupplier` FOREIGN KEY (`idSupplier`) REFERENCES `Supplier` (`idSupplier`)
@@ -133,13 +126,13 @@ CREATE TABLE IF NOT EXISTS `Supply` (
   COLLATE = utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `Buy` (
-  `idBuy`      INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idGoodsBuy` INT UNSIGNED NOT NULL,
-  `idClient`   INT UNSIGNED NOT NULL,
-  `date`       DATE         NOT NULL,
-  `quantity`   FLOAT        NOT NULL,
+  `idBuy`    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idGoods`  INT UNSIGNED NOT NULL,
+  `idClient` INT UNSIGNED NOT NULL,
+  `date`     DATE         NOT NULL,
+  `quantity` FLOAT        NOT NULL,
   UNIQUE INDEX `idBuy_UNIQUE` (`idBuy` ASC),
-  CONSTRAINT `idGoodsBuy` FOREIGN KEY (`idGoodsBuy`) REFERENCES `Goods` (`idGoods`)
+  CONSTRAINT `idGoodsBuy` FOREIGN KEY (`idGoods`) REFERENCES `Goods` (`idGoods`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `idClient` FOREIGN KEY (`idClient`) REFERENCES `User` (`idUser`)

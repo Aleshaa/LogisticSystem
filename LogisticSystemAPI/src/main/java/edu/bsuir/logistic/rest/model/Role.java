@@ -28,7 +28,7 @@ public class Role implements Serializable {
     private String nameRole;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "role")
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     private Set<User> users;
 
     @JsonIgnore

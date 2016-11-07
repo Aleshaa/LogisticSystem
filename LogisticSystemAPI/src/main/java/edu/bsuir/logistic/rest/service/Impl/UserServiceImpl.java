@@ -1,7 +1,8 @@
-package edu.bsuir.logistic.rest.service;
+package edu.bsuir.logistic.rest.service.Impl;
 
 import edu.bsuir.logistic.rest.dao.UserDao;
 import edu.bsuir.logistic.rest.model.User;
+import edu.bsuir.logistic.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,15 +43,14 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user) {
         User entity = dao.findById(user.getIdUser());
         if (entity != null) {
-            entity.setIdUser(user.getIdUser());
             if (!user.getPassword().equals(entity.getPassword())) {
                 entity.setPassword(passwordEncoder.encode(user.getPassword()));
             }
-            entity.setRole(user.getRole());
             entity.setName(user.getName());
             entity.setEmail(user.getEmail());
             entity.setPhone(user.getPhone());
             entity.setAbout(user.getAbout());
+            dao.updateUser(entity);
         }
     }
 

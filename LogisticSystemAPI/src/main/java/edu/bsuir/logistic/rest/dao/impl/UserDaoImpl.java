@@ -1,5 +1,7 @@
-package edu.bsuir.logistic.rest.dao;
+package edu.bsuir.logistic.rest.dao.impl;
 
+import edu.bsuir.logistic.rest.dao.AbstractDao;
+import edu.bsuir.logistic.rest.dao.UserDao;
 import edu.bsuir.logistic.rest.model.User;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
@@ -38,6 +40,10 @@ public class UserDaoImpl extends AbstractDao<Integer, User> implements UserDao {
 
     public void save(User user) {
         persist(user);
+    }
+
+    public void updateUser(User user) {
+        update(user);
     }
 
     @Override

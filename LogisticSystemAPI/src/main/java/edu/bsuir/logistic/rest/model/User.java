@@ -1,10 +1,14 @@
 package edu.bsuir.logistic.rest.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Table(name = "User")
@@ -16,7 +20,7 @@ public class User implements Serializable {
     @Column(name = "idUser", unique = true, nullable = false)
     private Integer idUser;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "idRole", nullable = false)
     private Role role;
 
@@ -43,6 +47,18 @@ public class User implements Serializable {
     @NotEmpty
     @Column(name = "Password", nullable = false)
     private String password;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    @Fetch(FetchMode.JOIN)
+    private Set<Address> addressSet;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "client")
+    @Fetch(FetchMode.JOIN)
+    private Set<Buy> buySet;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "client")
+    @Fetch(FetchMode.JOIN)
+    private Set<Purchase> purchases;
 
     public User() {
         idUser = 0;
@@ -123,5 +139,32 @@ public class User implements Serializable {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    @JsonIgnore
+    public Set<Address> getAddressSet() {
+        return addressSet;
+    }
+
+    public void setAddressSet(Set<Address> addressSet) {
+        this.addressSet = addressSet;
+    }
+
+    @JsonIgnore
+    public Set<Buy> getBuySet() {
+        return buySet;
+    }
+
+    public void setBuySet(Set<Buy> buySet) {
+        this.buySet = buySet;
+    }
+
+    @JsonIgnore
+    public Set<Purchase> getPurchases() {
+        return purchases;
+    }
+
+    public void setPurchases(Set<Purchase> purchases) {
+        this.purchases = purchases;
     }
 }

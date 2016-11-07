@@ -13,6 +13,8 @@ public interface UserDao {
 
     void save(User user);
 
+    void updateUser(User user);
+
     void deleteById(Integer id);
 
     void deleteAll();

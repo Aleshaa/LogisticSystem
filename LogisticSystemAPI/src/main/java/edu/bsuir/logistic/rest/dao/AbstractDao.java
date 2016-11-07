@@ -31,11 +31,6 @@ public abstract class AbstractDao<PK extends Serializable, T> {
         return (T) getSession().get(persistentClass, key);
     }
 
-    @SuppressWarnings("unchecked")
-    public T getByName(String key) {
-        return (T) getSession().get(persistentClass, key);
-    }
-
     public void persist(T entity) {
         getSession().persist(entity);
     }
@@ -50,10 +45,6 @@ public abstract class AbstractDao<PK extends Serializable, T> {
 
     protected Criteria createEntityCriteria() {
         return getSession().createCriteria(persistentClass);
-    }
-
-    protected Criteria createQueryCriteria(String query) {
-        return getSession().createCriteria(query);
     }
 
     protected Query createQuery(String query) {

@@ -26,7 +26,7 @@ public class UserController {
 
     //-------------------Retrieve All Users--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/users", method = RequestMethod.GET, produces = MediaType
+    @RequestMapping(value = "/rest/get/users", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<List<User>> listAllUsers() {
         List<User> users = userService.findAllUsers();
@@ -39,7 +39,7 @@ public class UserController {
 
     //-------------------Retrieve Single User--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/user/get/{id}", method = RequestMethod.GET, produces = MediaType
+    @RequestMapping(value = "/rest/get/user/{id}", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<User> getUser(@PathVariable("id") int id) {
         System.out.println("Fetching User with id " + id);
@@ -73,7 +73,7 @@ public class UserController {
 
     //------------------- Update a User --------------------------------------------------------
 
-    @RequestMapping(value = "/rest/user/update/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/rest/update/user/{id}", method = RequestMethod.PUT)
     public ResponseEntity<User> updateUser(@PathVariable("id") int id, @RequestBody User user) {
         System.out.println("Updating User " + id);
 
@@ -96,7 +96,7 @@ public class UserController {
 
     //------------------- Delete a User --------------------------------------------------------
 
-    @RequestMapping(value = "/rest/user/delete/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/rest/delete/user/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<User> deleteUser(@PathVariable("id") int id) {
         System.out.println("Fetching & Deleting User with id " + id);
 
@@ -113,7 +113,7 @@ public class UserController {
 
     //------------------- Delete All Users --------------------------------------------------------
 
-    @RequestMapping(value = "/rest/users", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/rest/delete/users", method = RequestMethod.DELETE)
     public ResponseEntity<User> deleteAllUsers() {
         System.out.println("Deleting All Users");
 
