@@ -1,8 +1,11 @@
 package edu.bsuir.logistic.rest.controller;
 
 import edu.bsuir.logistic.rest.model.Buy;
+import edu.bsuir.logistic.rest.model.Goods;
 import edu.bsuir.logistic.rest.model.User;
 import edu.bsuir.logistic.rest.service.BuyService;
+import edu.bsuir.logistic.rest.service.GoodsService;
+import edu.bsuir.logistic.rest.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +27,12 @@ public class BuyController {
 
     @Autowired
     BuyService buyService;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    GoodsService goodsService;
 
     //-------------------Retrieve All Buys--------------------------------------------------------
 
@@ -55,15 +64,26 @@ public class BuyController {
 
     //-------------------Create a Buy--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/create/buy", method = RequestMethod.POST)
-    public ResponseEntity<Void> createBuy(@RequestBody Buy buy, UriComponentsBuilder ucBuilder) {
+    @RequestMapping(value = "/rest/create/buy/{idClient}/{idGoods}", method = RequestMethod.POST)
+    public ResponseEntity<Void> createBuy(@PathVariable("idClient") int idClient,
+                                          @PathVariable("idGoods") int idGoods,
+                                          @RequestBody Buy buy, UriComponentsBuilder ucBuilder) {
         System.out.println("Creating Buy " + buy.getIdBuy());
 
-        buyService.saveBuy(buy);
+        Goods buyedGoods = goodsService.findById(idGoods);
+        if (buyedGoods.getQuantity() - buy.getQuantity() > 0) {
+            buyedGoods.setQuantity(buyedGoods.getQuantity() - buy.getQuantity());
+            buy.setClient(userService.findById(idClient));
+            buy.setGoods(buyedGoods);
+            buyService.saveBuy(buy);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(ucBuilder.path("/buy/{id}").buildAndExpand(buy.getIdBuy()).toUri());
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+            goodsService.updateGoods(buyedGoods);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(ucBuilder.path("/buy/{id}").buildAndExpand(buy.getIdBuy()).toUri());
+            return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        } else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 
@@ -80,10 +100,16 @@ public class BuyController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        currentBuy.setQuantity(buy.getQuantity());
-
-        buyService.updateBuy(currentBuy);
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (currentBuy.getGoods().getQuantity() + currentBuy.getQuantity() - buy.getQuantity() > 0) {
+            currentBuy.setQuantity(buy.getQuantity());
+            Goods currentGoods = currentBuy.getGoods();
+            currentGoods.setQuantity(currentBuy.getGoods().getQuantity() + currentBuy.getQuantity() - buy.getQuantity
+                    ());
+            buyService.updateBuy(currentBuy);
+            goodsService.updateGoods(currentGoods);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     //------------------- Delete a Buy --------------------------------------------------------
