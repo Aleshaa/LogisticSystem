@@ -71,7 +71,7 @@ public class BuyController {
         System.out.println("Creating Buy " + buy.getIdBuy());
 
         Goods buyedGoods = goodsService.findById(idGoods);
-        if (buyedGoods.getQuantity() - buy.getQuantity() > 0) {
+        if (buyedGoods.getQuantity() - buy.getQuantity() >= 0) {
             buyedGoods.setQuantity(buyedGoods.getQuantity() - buy.getQuantity());
             buy.setClient(userService.findById(idClient));
             buy.setGoods(buyedGoods);
@@ -100,13 +100,16 @@ public class BuyController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (currentBuy.getGoods().getQuantity() + currentBuy.getQuantity() - buy.getQuantity() > 0) {
-            currentBuy.setQuantity(buy.getQuantity());
+        if (currentBuy.getGoods().getQuantity() + currentBuy.getQuantity() - buy.getQuantity() >= 0) {
             Goods currentGoods = currentBuy.getGoods();
             currentGoods.setQuantity(currentBuy.getGoods().getQuantity() + currentBuy.getQuantity() - buy.getQuantity
                     ());
+
+            currentBuy.setQuantity(buy.getQuantity());
             buyService.updateBuy(currentBuy);
+
             goodsService.updateGoods(currentGoods);
+
             return new ResponseEntity<>(HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

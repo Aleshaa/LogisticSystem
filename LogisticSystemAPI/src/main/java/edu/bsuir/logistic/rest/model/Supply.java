@@ -1,8 +1,7 @@
 package edu.bsuir.logistic.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -30,9 +29,10 @@ public class Supply implements Serializable {
     @JoinColumn(name = "idSupplier", nullable = false)
     private Supplier supplier;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "date", nullable = false)
-    @Type(type = "date")
+    @Temporal(javax.persistence.TemporalType.DATE)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date date;
 
     @NotNull

@@ -40,7 +40,6 @@ public class Goods implements Serializable {
     @Column(name = "price", nullable = false)
     private float price;
 
-    @NotEmpty
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "m2m_goods_address",
             joinColumns = {@JoinColumn(name = "idGoods")},
