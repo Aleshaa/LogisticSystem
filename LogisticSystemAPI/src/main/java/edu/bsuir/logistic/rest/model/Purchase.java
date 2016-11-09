@@ -19,7 +19,7 @@ public class Purchase implements Serializable {
     @Column(name = "idPurchase", unique = true, nullable = false)
     private Integer idPurchase;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idGoods", nullable = false)
     private Goods goods;
 

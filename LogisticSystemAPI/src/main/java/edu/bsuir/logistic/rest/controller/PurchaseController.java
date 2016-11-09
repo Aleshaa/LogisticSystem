@@ -1,8 +1,11 @@
 package edu.bsuir.logistic.rest.controller;
 
+import edu.bsuir.logistic.rest.model.Goods;
 import edu.bsuir.logistic.rest.model.Purchase;
 import edu.bsuir.logistic.rest.model.User;
+import edu.bsuir.logistic.rest.service.GoodsService;
 import edu.bsuir.logistic.rest.service.PurchaseService;
+import edu.bsuir.logistic.rest.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +27,12 @@ public class PurchaseController {
 
     @Autowired
     PurchaseService purchaseService;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    GoodsService goodsService;
 
     //-------------------Retrieve All Purchases--------------------------------------------------------
 
@@ -55,10 +64,19 @@ public class PurchaseController {
 
     //-------------------Create a Purchase--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/create/purchase", method = RequestMethod.POST)
-    public ResponseEntity<Void> createPurchase(@RequestBody Purchase purchase, UriComponentsBuilder ucBuilder) {
+    @RequestMapping(value = "/rest/create/purchase/{idClient}/{idGoods}", method = RequestMethod.POST)
+    public ResponseEntity<Void> createPurchase(@PathVariable("idClient") int idClient, @PathVariable("idGoods") int
+            idGoods, @RequestBody Purchase purchase, UriComponentsBuilder ucBuilder) {
         System.out.println("Creating Purchase " + purchase.getIdPurchase());
 
+        User client = userService.findById(idClient);
+        Goods goods = goodsService.findById(idGoods);
+
+        if (client == null || goods == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        purchase.setClient(client);
+        purchase.setGoods(goods);
         purchaseService.savePurchase(purchase);
 
         HttpHeaders headers = new HttpHeaders();
@@ -69,8 +87,9 @@ public class PurchaseController {
 
     //------------------- Update a Purchase --------------------------------------------------------
 
-    @RequestMapping(value = "/rest/update/purchase/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id, @RequestBody Purchase purchase) {
+    @RequestMapping(value = "/rest/update/purchase/{id}/{newGoods}", method = RequestMethod.PUT)
+    public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id, @PathVariable("newGoods") int newGoods,
+                                               @RequestBody Purchase purchase) {
         System.out.println("Updating Purchase " + id);
 
         Purchase currentPurchase = purchaseService.findById(id);
@@ -80,7 +99,14 @@ public class PurchaseController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        Goods goods = goodsService.findById(newGoods);
+
+        if (goods != null) {
+            currentPurchase.setGoods(goods);
+        }
+
         currentPurchase.setQuantity(purchase.getQuantity());
+        currentPurchase.setFrequency(purchase.getFrequency());
 
         purchaseService.updatePurchase(currentPurchase);
         return new ResponseEntity<>(HttpStatus.OK);

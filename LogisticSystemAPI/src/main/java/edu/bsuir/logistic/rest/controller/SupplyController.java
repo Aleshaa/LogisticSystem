@@ -1,7 +1,11 @@
 package edu.bsuir.logistic.rest.controller;
 
+import edu.bsuir.logistic.rest.model.Goods;
+import edu.bsuir.logistic.rest.model.Supplier;
 import edu.bsuir.logistic.rest.model.Supply;
 import edu.bsuir.logistic.rest.model.User;
+import edu.bsuir.logistic.rest.service.GoodsService;
+import edu.bsuir.logistic.rest.service.SupplierService;
 import edu.bsuir.logistic.rest.service.SupplyService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,12 @@ public class SupplyController {
 
     @Autowired
     SupplyService supplyService;
+
+    @Autowired
+    SupplierService supplierService;
+
+    @Autowired
+    GoodsService goodsService;
 
     //-------------------Retrieve All Supplies--------------------------------------------------------
 
@@ -55,10 +65,19 @@ public class SupplyController {
 
     //-------------------Create a Supply--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/create/supply", method = RequestMethod.POST)
-    public ResponseEntity<Void> createSupply(@RequestBody Supply supply, UriComponentsBuilder ucBuilder) {
+    @RequestMapping(value = "/rest/create/supply/{idSupplier}/{idGoods}", method = RequestMethod.POST)
+    public ResponseEntity<Void> createSupply(@PathVariable("idSupplier") int idSupplier, @PathVariable("idGoods") int
+            idGoods, @RequestBody Supply supply, UriComponentsBuilder ucBuilder) {
         System.out.println("Creating Supply " + supply.getIdSupply());
 
+        Supplier supplier = supplierService.findById(idSupplier);
+        Goods goods = goodsService.findById(idGoods);
+
+        if (supplier == null || goods == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        supply.setGoods(goods);
+        supply.setSupplier(supplier);
         supplyService.saveSupply(supply);
 
         HttpHeaders headers = new HttpHeaders();
