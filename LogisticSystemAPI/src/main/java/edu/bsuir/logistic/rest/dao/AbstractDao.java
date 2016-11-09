@@ -1,6 +1,7 @@
 package edu.bsuir.logistic.rest.dao;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     }
 
     public void update(T entity) {
-        getSession().update(entity);
+        getSession().merge(entity);
     }
 
     public void delete(T entity) {
@@ -46,4 +47,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
         return getSession().createCriteria(persistentClass);
     }
 
+    protected Query createQuery(String query) {
+        return getSession().createQuery(query);
+    }
 }

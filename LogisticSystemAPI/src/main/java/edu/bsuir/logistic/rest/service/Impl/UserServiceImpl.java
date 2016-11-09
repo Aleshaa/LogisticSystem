@@ -1,7 +1,8 @@
-package edu.bsuir.logistic.rest.service;
+package edu.bsuir.logistic.rest.service.Impl;
 
 import edu.bsuir.logistic.rest.dao.UserDao;
 import edu.bsuir.logistic.rest.model.User;
+import edu.bsuir.logistic.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,16 @@ public class UserServiceImpl implements UserService {
         return dao.findById(id);
     }
 
+    @Override
+    public User findByUsername(String username) {
+        return dao.findByUsername(username);
+    }
+
+    @Override
+    public boolean isUserExist(User user) {
+        return dao.findByUsername(user.getUsername()) != null;
+    }
+
     public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         dao.save(user);
@@ -32,21 +43,25 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user) {
         User entity = dao.findById(user.getIdUser());
         if (entity != null) {
-            entity.setIdUser(user.getIdUser());
             if (!user.getPassword().equals(entity.getPassword())) {
                 entity.setPassword(passwordEncoder.encode(user.getPassword()));
             }
-            entity.setIdRole(user.getIdRole());
             entity.setName(user.getName());
             entity.setEmail(user.getEmail());
             entity.setPhone(user.getPhone());
             entity.setAbout(user.getAbout());
+            dao.updateUser(entity);
         }
     }
 
     @Override
-    public void deleteUserById(String id) {
+    public void deleteUserById(int id) {
         dao.deleteById(id);
+    }
+
+    @Override
+    public void deleteAll() {
+        dao.deleteAll();
     }
 
     public List<User> findAllUsers() {

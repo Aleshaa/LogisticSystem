@@ -9,11 +9,17 @@ public interface UserService {
 
     User findById(int id);
 
+    User findByUsername(String username);
+
+    boolean isUserExist(User user);
+
     void saveUser(User user);
 
     void updateUser(User user);
 
-    void deleteUserById(String id);
+    void deleteUserById(int id);
+
+    void deleteAll();
 
     List<User> findAllUsers();
 

@@ -1,10 +1,13 @@
 package edu.bsuir.logistic.rest.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -12,19 +15,23 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "Role")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Role implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idRole", unique = true, nullable = false)
     private Integer idRole;
 
     @NotEmpty
     @Column(name = "NameRole", nullable = false)
     private String nameRole;
 
-    private Set<User> users = new HashSet<>();
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "role")
+    @Fetch(FetchMode.JOIN)
+    private Set<User> users;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "stock")
+    @JsonIgnore
     public Set<User> getUsers() {
         return this.users;
     }
@@ -43,5 +50,9 @@ public class Role implements Serializable {
 
     public void setNameRole(String nameRole) {
         this.nameRole = nameRole;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }
