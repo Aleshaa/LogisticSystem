@@ -8,13 +8,14 @@
     UserService.$inject = ['$http'];
     function UserService($http) {
 
-        var REST_SERVICE_URI = 'http://localhost:8080/';
+        var REST_SERVICE_URI = 'http://localhost:8080';
 
         var service = {};
 
         service.GetAll = GetAll;
         service.GetById = GetById;
         service.GetByUsername = GetByUsername;
+        service.GetCurrentUser = GetCurrentUser;
         service.Create = Create;
         service.Update = Update;
         service.Delete = Delete;
@@ -31,6 +32,10 @@
 
         function GetByUsername(username) {
             return $http.get('/api/users/' + username).then(handleSuccess, handleError('Error getting user by username'));
+        }
+
+        function GetCurrentUser() {
+            return $http.get(REST_SERVICE_URI + '/rest/get/currentUser').then(handleSuccess, handleError('Error getting user by username'));
         }
 
         function Create(user) {
