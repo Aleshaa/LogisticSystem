@@ -39,7 +39,7 @@
              ----------------------------------------------*/
             $http.get(REST_SERVICE_URI + '/rest/authenticate', {})
                 .success(function (response) {
-                    userRole = response.role.idRole;
+                    userRole = response.role.nameRole;
                     response = {success: true};
                     callback(response);
                 })

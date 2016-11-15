@@ -11,20 +11,31 @@
         $routeProvider
             .when('/', {
                 controller: 'HomeController',
-                templateUrl: 'home/home.view.html',
+                templateUrl: 'modules/home/home.view.html',
                 controllerAs: 'vm',
                 roles: ['ADMIN']
             })
 
             .when('/login', {
                 controller: 'LoginController',
-                templateUrl: 'login/login.view.html',
+                templateUrl: 'modules/login/login.view.html',
+                controllerAs: 'vm'
+            })
+
+            .when('/logout', {
+                controller: 'LoginController',
+                templateUrl: 'modules/login/login.view.html',
                 controllerAs: 'vm'
             })
 
             .when('/register', {
                 controller: 'RegisterController',
-                templateUrl: 'register/register.view.html',
+                templateUrl: 'modules/register/register.view.html',
+                controllerAs: 'vm'
+            })
+            .when('/accessDenied', {
+                controller: 'RegisterController',
+                templateUrl: 'modules/accessDenied.view.html',
                 controllerAs: 'vm'
             })
 
@@ -47,8 +58,19 @@
             var requiredRole = nextRoute.roles;
             var restrictedPage = $.inArray($location.path(), ['/login', '/register']) === -1;
             var loggedIn = $rootScope.globals.currentUser;
+            if ($location.path() == '/logout') {
+                $rootScope.globals = {};
+                $cookieStore.remove('globals');
+                $http.defaults.headers.common.Authorization = 'Basic';
+            }
+            if (requiredRole != undefined && loggedIn && $.inArray($rootScope.globals.currentUser.role, requiredRole) === -1) {
+                $location.path('/accessDenied');
+            }
             if (restrictedPage && !loggedIn) {
                 $location.path('/login');
+            }
+            if (!restrictedPage && loggedIn) {
+                $location.path('/');
             }
         });
     }
