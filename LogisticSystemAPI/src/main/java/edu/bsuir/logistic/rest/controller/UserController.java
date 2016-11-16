@@ -8,6 +8,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -119,5 +121,35 @@ public class UserController {
 
         userService.deleteAll();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    //------------------- Authentication --------------------------------------------------------
+
+    @RequestMapping(value = "/rest/authenticate", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<User> authenticate() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    //------------------- Get Current Login User --------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/currentUser", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<User> getCurrentUser() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }
