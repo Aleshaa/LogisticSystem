@@ -1,8 +1,8 @@
 ## To Start Project
 (optional)
 =================================
-(
- `sudo apt-get install node`
+
+( `sudo apt-get install node`
  
 =================================
 
@@ -10,9 +10,8 @@
  
 =================================
 
- `attentin on folder dist`
+ `attentin on folder dist`)
  
- )
 ================================
 
 `sudo npm install`
