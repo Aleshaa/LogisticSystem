@@ -1,0 +1,60 @@
+{
+  "name": "angular-easy-starter",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "browserify": "browserify ./public/js/app.js > ./public/dist/js/app.js",
+    "compile-scss": "node-sass --output-style compressed -o ./public/dist/css ./public/scss/app.scss",
+    "concat-js-libs": "gulp concat-js-libs",
+    "concat-css-libs": "gulp concat-css-libs",
+    "build:css": "npm run compile-scss && npm run concat-css-libs",
+    "build:js": "npm run browserify && npm run concat-js-libs",
+    "build:all": "npm run build:js && npm run build:css",
+    "start-server": "npm run build:all && nodemon ./server/app.js",
+    "watch:all": "npm-scripts-watcher",
+    "start": "parallelshell 'npm run start-server' 'npm run watch:all'"
+  },
+  "dependencies": {
+    "domready": "^1.0.8",
+    "request": "2.61.0",
+    "serve-favicon": "2.2.0"
+  },
+  "devDependencies": {
+    "bower": "1.4.1",
+    "browserify-shim": "3.8.6",
+    "consolidate": "^0.14.4",
+    "crypto": "0.0.3",
+    "express": "^4.14.0",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "mustache": "^2.3.0",
+    "node-sass": "^3.13.0",
+    "nodemon": "^1.11.0",
+    "npm-scripts-watcher": "^1.0.2",
+    "parallelshell": "^2.0.0",
+    "partialify": "3.1.3",
+    "path": "^0.12.7",
+    "through2": "2.0.0"
+  },
+  "watch": {
+    "public/scss/**/*.scss": [
+      "build:css"
+    ],
+    "public/js/**/*.*": [
+      "build:js"
+    ]
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim",
+      "partialify"
+    ]
+  },
+  "browserify-shim": {
+    "angular": "global:angular",
+    "lodash": "global:_",
+    "alertify": "global:alertify",
+    "moment": "global:moment",
+    "moment-timezone": "global:moment-timezone"
+  }
+}
