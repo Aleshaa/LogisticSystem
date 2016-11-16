@@ -33,9 +33,9 @@ INSERT INTO `Goods` (`idGoods`, `name`, `about`, `quantity`, `price`) VALUES (3,
 
 INSERT INTO `m2m_goods_address` (`idGoods`, `idAddress`) VALUES (1, 4);
 
-INSERT INTO `Supply` (`idSupply`, `idGoodsSupply`, `idSupplier`, `date`, `quantity`)
+INSERT INTO `Supply` (`idSupply`, `idGoods`, `idSupplier`, `date`, `quantity`)
 VALUES (1, 1, 2, '2016-09-01', 500);
 
-INSERT INTO `Buy` (`idBuy`, `idGoodsBuy`, `idClient`, `date`, `quantity`) VALUES (1, 1, 2, '2016-09-05', 200);
+INSERT INTO `Buy` (`idBuy`, `idGoods`, `idClient`, `date`, `quantity`) VALUES (1, 1, 2, '2016-09-05', 200);
 
 INSERT INTO `Purchase` (`idPurchase`, `idGoods`, `idClient`, `frequency`, `quantity`) VALUES (1, 1, 2, 3, 200);
