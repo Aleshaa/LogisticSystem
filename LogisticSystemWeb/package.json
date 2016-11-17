@@ -12,7 +12,8 @@
     "build:all": "npm run build:js && npm run build:css",
     "start-server": "npm run build:all && nodemon ./server/app.js",
     "watch:all": "npm-scripts-watcher",
-    "start": "parallelshell 'npm run start-server' 'npm run watch:all'"
+    "dev": "concurrently --kill-others \"npm run start-server\" \"npm run watch:all\"",
+    "start": "parallelshell 'npm run start-server' && 'npm run watch:all'"
   },
   "dependencies": {
     "domready": "^1.0.8",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "bower": "1.4.1",
     "browserify-shim": "3.8.6",
+    "concurrently": "^3.1.0",
     "consolidate": "^0.14.4",
     "crypto": "0.0.3",
     "express": "^4.14.0",

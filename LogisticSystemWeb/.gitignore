@@ -1,8 +1,6 @@
 .idea
 node_modules
 public/bower_components
-public/dist/css/*
-public/dist/js/*
 bower_components
 /public/img/*.png
 npm-debug.log
