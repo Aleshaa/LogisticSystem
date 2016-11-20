@@ -6,10 +6,13 @@ var angular = require('angular');
 //require common modules
 require('./common/request');
 require('./common/message');
+require('./common/auth');
+require('./common/flash');
 
 //require project modules
 require('./modules/home');
 require('./modules/user');
+require('./modules/login');
 
 domready(function () {
     angular
@@ -20,7 +23,10 @@ domready(function () {
 
             'Request',
             'Message',
+            'Auth',
+            'Flash',
 
+            'Login',
             'Home',
             'User'
         ]);

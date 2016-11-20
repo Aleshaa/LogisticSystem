@@ -3,7 +3,7 @@
 var angular = require('angular');
 
 module.exports = function () {
-    var apiUrl = 'http://api.testapi.com/v1/',
+    var apiUrl = 'http://localhost:8080/',
         defaultConfig = {
             cache: false,
             withCredentials: true

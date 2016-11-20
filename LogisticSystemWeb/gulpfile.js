@@ -11,7 +11,17 @@ var jsLibs = [
     './public/bower_components/angular-local-storage/dist/angular-local-storage.js'
 ];
 
-var cssFiles = [];
+var cssFiles = [
+    './public/bower_components/ng-tags-input/ng-tags-input.css',
+    './public/bower_components/titatoggle/dist/titatoggle-dist.css',
+    './public/bower_components/angular-ui-select/dist/select.css',
+    './public/bower_components/angular-datepicker/dist/angular-datepicker.css',
+    './public/bower_components/fullcalendar/dist/fullcalendar.css',
+    './public/bower_components/angular-xeditable/dist/css/xeditable.css',
+    './public/bower_components/ng-dialog/css/ngDialog.css',
+    './public/bower_components/ng-dialog/css/ngDialog-theme-default.css',
+    './public/bower_components/angularjs-slider/dist/rzslider.css'
+];
 
 gulp.task('concat-js-libs', function () {
     gulp.src(jsLibs)

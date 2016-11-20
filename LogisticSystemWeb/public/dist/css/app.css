@@ -1,11 +1,1 @@
-body {
-    background: #ffdcb1
-}
-
-.first-class {
-    background: green
-}
-
-.first-class {
-    background: blue
-}
+@import url(../../bower_components/bootstrap/dist/css/bootstrap.min.css);body{background:#f1fff8}.first-class{background:green}.first-class{background:blue}
