@@ -1,0 +1,35 @@
+{
+  "name": "logistic-system",
+  "version": "0.0.1",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components"
+  ],
+  "dependencies": {
+    "angular": "1.5.8",
+    "angular-bootstrap": "~0.14.3",
+    "angular-ui-router": "0.2.14",
+    "angular-route": "^1.5.8",
+    "bootstrap": "3.3.4",
+    "moment": "2.10.3",
+    "moment-timezone": "0.3.1",
+    "lodash": "3.8.0",
+    "font-awesome": "~4.4.0",
+    "ng-file-upload": "~10.1.9",
+    "angular-local-storage": "^0.3.0",
+    "angular-websocket": "^2.0.0",
+    "angular-spinner": "^0.8.1",
+    "ng-tags-input": "^3.1.1",
+    "titatoggle": "^1.2.11",
+    "angular-ui-select": "^0.19.4",
+    "angular-sanitize": "^1.5.8",
+    "angular-xeditable": "~0.4.0",
+    "angular-treeview": "*",
+    "ng-dialog": "^0.6.4",
+    "angularjs-slider": "^5.8.3",
+    "angular-scroll": "~1.0.0"
+  }
+}

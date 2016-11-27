@@ -1,0 +1,8 @@
+.idea
+node_modules
+public/bower_components
+bower_components
+public/dist/css/*.css
+public/dist/js/*.js
+/public/img/*.png
+npm-debug.log
