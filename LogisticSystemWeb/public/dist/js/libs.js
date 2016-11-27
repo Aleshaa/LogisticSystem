@@ -342,14 +342,14 @@
                 for (key in obj) {
                     if (obj.hasOwnProperty(key)) {
                         iterator.call(context, obj[key], key, obj);
-                    }
+        }
                 }
             } else {
                 // Slow path for objects which do not have a method `hasOwnProperty`
                 for (key in obj) {
                     if (hasOwnProperty.call(obj, key)) {
                         iterator.call(context, obj[key], key, obj);
-                    }
+        }
                 }
     }
         }
@@ -956,7 +956,7 @@
                 for (key in source) {
                     if (hasOwnProperty.call(source, key)) {
                         destination[key] = copyElement(source[key]);
-                    }
+        }
                 }
             }
             setHashKey(destination, h);
@@ -2394,7 +2394,7 @@
                 if (!(key.charAt(0) === '$' && key.charAt(1) === '$')) {
                     dst[key] = src[key];
                 }
-            }
+    }
         }
 
         return dst || src;
@@ -2412,7 +2412,7 @@
                 if (seen.indexOf(val) >= 0) return '...';
 
                 seen.push(val);
-            }
+    }
             return val;
         });
     }
@@ -2682,7 +2682,7 @@
                     $$HashMap: $$HashMapProvider,
                     $$cookieReader: $$CookieReaderProvider
                 });
-            }
+    }
         ]);
     }
 
@@ -3757,7 +3757,7 @@
                     if (isDefined(value)) {
                         // any function which returns a value needs to be wrapped
                         value = jqLite(value);
-                    }
+        }
                 } else {
                     jqLiteAddNodes(value, fn(this[i], arg1, arg2, arg3));
                 }
@@ -4659,7 +4659,7 @@
                 } catch (e) {
                     if (isArray(module)) {
                         module = module[module.length - 1];
-                    }
+        }
                     if (e.message && e.stack && e.stack.indexOf(e.message) == -1) {
                         // Safari & FF's stack traces don't contain error.message content
                         // unlike those of Chrome and IE
@@ -5070,7 +5070,7 @@
             var elm = element[i];
             if (elm.nodeType === ELEMENT_NODE) {
                 return elm;
-            }
+    }
         }
     }
 
@@ -5087,7 +5087,7 @@
             // incase extra spaces were applied to the options
             if (klass.length) {
                 obj[klass] = true;
-            }
+    }
         });
         return obj;
     }
@@ -5688,7 +5688,7 @@
                     options.tempClasses = mergeClasses(options.tempClasses, className);
                     return $$animateQueue.push(element, 'animate', options);
                 }
-            };
+    };
         }];
     }];
 
@@ -5746,7 +5746,7 @@
                             next();
                         });
                     }
-                };
+    };
 
                 AnimateRunner.all = function (runners, callback) {
                     var count = 0;
@@ -5759,7 +5759,7 @@
                         status = status && response;
                         if (++count === runners.length) {
                             callback(status);
-                        }
+        }
                     }
                 };
 
@@ -5781,7 +5781,7 @@
                             timeoutTick(fn);
                         } else {
                             rafTick(fn);
-                        }
+        }
                     };
                     this._state = 0;
                 }
@@ -5796,7 +5796,7 @@
                             fn();
                         } else {
                             this._doneCallbacks.push(fn);
-                        }
+        }
                     },
 
                     progress: noop,
@@ -5807,9 +5807,9 @@
                             this.promise = $q(function (resolve, reject) {
                                 self.done(function (status) {
                                     status === false ? reject() : resolve();
-                                });
+            });
                             });
-                        }
+        }
                         return this.promise;
                     },
 
@@ -5870,7 +5870,7 @@
                             this._state = DONE_COMPLETE_STATE;
                         }
                     }
-    };
+                };
 
                 return AnimateRunner;
             }];
@@ -5944,7 +5944,7 @@
                         options.to = null;
                     }
                 }
-    };
+            };
         }];
     };
 
@@ -6006,9 +6006,9 @@
                         } catch (e) {
                             $log.error(e);
                         }
-        }
+                    }
                 }
-            }
+    }
         }
 
         function getHash(url) {
@@ -6027,7 +6027,7 @@
                 callback();
             } else {
                 outstandingRequestCallbacks.push(callback);
-            }
+    }
         };
 
         //////////////////////////////////////////////////////////////
@@ -6043,7 +6043,7 @@
                     return history.state;
                 } catch (e) {
                     // MSIE can reportedly throw when there is no state (UNCONFIRMED).
-        }
+                }
             };
 
         cacheState();
@@ -6075,7 +6075,7 @@
             // to undefined via `pushState`. Instead, let's change `undefined` to `null` here.
             if (isUndefined(state)) {
                 state = null;
-            }
+    }
 
             // Android Browser BFCache causes location, history reference to become stale.
             if (location !== window.location) location = window.location;
@@ -6100,13 +6100,13 @@
                 // in some cases (see #9143).
                 if ($sniffer.history && (!sameBase || !sameState)) {
                     history[replace ? 'replaceState' : 'pushState'](state, '', url);
-        cacheState();
+                    cacheState();
                     // Do the assignment again so that those two variables are referentially identical.
-        lastHistoryState = cachedState;
+                    lastHistoryState = cachedState;
                 } else {
                     if (!sameBase) {
                         pendingLocation = url;
-        }
+                    }
                     if (replace) {
                         location.replace(url);
                     } else if (!sameBase) {
@@ -6299,7 +6299,7 @@
                 clearTimeout(deferId);
                 completeOutstandingRequest(noop);
                 return true;
-    }
+            }
             return false;
         };
 
@@ -9543,7 +9543,7 @@
                                             parseDirectiveBindings(directive, directive.name);
                                         if (isObject(bindings.isolateScope)) {
                                             directive.$$isolateBindings = bindings.isolateScope;
-                                        }
+                }
                                     }
                                     tDirectives.push(directive);
                                     match = directive;
@@ -10137,7 +10137,7 @@
                             }
                         }
                     };
-                }
+    }
             }];
     }
 
@@ -10402,7 +10402,7 @@
                             if (identifier) {
                                 // If result changed, re-assign controllerAs value to scope.
                                 addIdentifier(locals, identifier, instance, constructor || expression.name);
-                            }
+            }
                         }
                         return instance;
                     }, {
@@ -10428,7 +10428,7 @@
                 }
 
                 locals.$scope[identifier] = instance;
-            }
+    }
         }];
     }
 
@@ -12970,7 +12970,7 @@
     }
             if (rewrittenUrl) {
                 this.$$parse(rewrittenUrl);
-            }
+    }
             return !!rewrittenUrl;
         };
     }
@@ -15061,16 +15061,16 @@
                                 ensureSafeMemberName(ast.property.name);
                                 if (create && create !== 1) {
                                     self.if_(self.not(self.nonComputedMember(left, ast.property.name)), self.lazyAssign(self.nonComputedMember(left, ast.property.name), '{}'));
-                                }
+            }
                                 expression = self.nonComputedMember(left, ast.property.name);
                                 if (self.state.expensiveChecks || isPossiblyDangerousMemberName(ast.property.name)) {
                                     expression = self.ensureSafeObject(expression);
-                                }
+            }
                                 self.assign(intoId, expression);
                                 if (nameId) {
                                     nameId.computed = false;
                                     nameId.name = ast.property.name;
-                                }
+            }
                             }
                         }, function () {
                             self.assign(intoId, 'undefined');
@@ -15417,7 +15417,7 @@
             var left, right, self = this, args, expression;
             if (ast.input) {
                 return this.inputs(ast.input, ast.watchId);
-            }
+    }
             switch (ast.type) {
                 case AST.Literal:
                     return this.value(ast.value, context);
@@ -15504,7 +15504,7 @@
                         var value = [];
                         for (var i = 0; i < args.length; ++i) {
                             value.push(args[i](scope, locals, assign, inputs));
-                        }
+        }
                         return context ? {value: value} : value;
                     };
                 case AST.ObjectExpression:
@@ -15561,7 +15561,7 @@
                     arg = 0;
                 }
                 return context ? {value: arg} : arg;
-            };
+    };
         },
         'unary-': function (argument, context) {
             return function (scope, locals, assign, inputs) {
@@ -15572,7 +15572,7 @@
                     arg = 0;
                 }
                 return context ? {value: arg} : arg;
-            };
+    };
         },
         'unary!': function (argument, context) {
             return function (scope, locals, assign, inputs) {
@@ -18162,7 +18162,7 @@
                         }
                     }
                     applyAsyncId = null;
-                }
+    }
 
                 function scheduleApplyAsync() {
                     if (applyAsyncId === null) {
@@ -18170,7 +18170,7 @@
                             $rootScope.$apply(flushApplyAsync);
                         });
                     }
-                }
+    }
             }];
     }
 
@@ -18635,7 +18635,7 @@
                     return htmlSanitizer(maybeTrusted);
                 }
                 throw $sceMinErr('unsafe', 'Attempting to use an unsafe value in a safe context.');
-            }
+    }
 
             return {
                 trustAs: trustAs,
@@ -19304,7 +19304,7 @@
              *      `context`.
      */
 
-            // Shorthand delegations.
+                // Shorthand delegations.
             var parse = sce.parseAs,
                 getTrusted = sce.getTrusted,
                 trustAs = sce.trustAs;
@@ -19343,8 +19343,8 @@
     function $SnifferProvider() {
         this.$get = ['$window', '$document', function ($window, $document) {
             var eventSupport = {},
-            // Chrome Packaged Apps are not allowed to access `history.pushState`. They can be detected by
-            // the presence of `chrome.app.runtime` (see https://developer.chrome.com/apps/api_index)
+                // Chrome Packaged Apps are not allowed to access `history.pushState`. They can be detected by
+                // the presence of `chrome.app.runtime` (see https://developer.chrome.com/apps/api_index)
                 isChromePackagedApp = $window.chrome && $window.chrome.app && $window.chrome.app.runtime,
                 hasHistoryPushState = !isChromePackagedApp && $window.history && $window.history.pushState,
                 android =
@@ -20339,7 +20339,7 @@
                         if (!deepCompare(actualVal, expectedVal, comparator, anyPropertyKey, matchAnyProperty, matchAnyProperty)) {
                             return false;
                         }
-                    }
+        }
                     return true;
                 } else {
                     return comparator(actual, expected);
@@ -20419,7 +20419,7 @@
         return function (amount, currencySymbol, fractionSize) {
             if (isUndefined(currencySymbol)) {
                 currencySymbol = formats.CURRENCY_SYM;
-            }
+    }
 
             if (isUndefined(fractionSize)) {
                 fractionSize = formats.PATTERNS[1].maxFrac;
@@ -20686,10 +20686,10 @@
             var groups = [];
             if (digits.length >= pattern.lgSize) {
                 groups.unshift(digits.splice(-pattern.lgSize, digits.length).join(''));
-            }
+    }
             while (digits.length > pattern.gSize) {
                 groups.unshift(digits.splice(-pattern.gSize, digits.length).join(''));
-            }
+    }
             if (digits.length) {
                 groups.unshift(digits.join(''));
             }
@@ -20698,7 +20698,7 @@
             // append the decimal digits
             if (decimals.length) {
                 formattedText += decimalSep + decimals.join('');
-            }
+    }
 
             if (exponent) {
                 formattedText += 'e+' + exponent;
@@ -20990,7 +20990,7 @@
                     parts.push(format);
                     format = null;
                 }
-            }
+    }
 
             var dateTimezoneOffset = date.getTimezoneOffset();
             if (timezone) {
@@ -21827,10 +21827,10 @@
                                 return value[key];
                             };
                         }
-                    }
+        }
                 }
                 return {get: get, descending: descending};
-    });
+            });
         }
 
         function isPrimitive(value) {
@@ -21895,7 +21895,7 @@
                 }
             } else {
                 result = type1 < type2 ? -1 : 1;
-            }
+    }
 
             return result;
         }
@@ -24174,7 +24174,7 @@
                 }
 
                 return new Date(year, 0, firstThurs.getDate() + addDays, hours, minutes, seconds, milliseconds);
-            }
+    }
         }
 
         return NaN;
@@ -24224,7 +24224,7 @@
                     });
                     return new Date(map.yyyy, map.MM - 1, map.dd, map.HH, map.mm, map.ss || 0, map.sss * 1000 || 0);
                 }
-            }
+    }
 
             return NaN;
         };
@@ -24289,7 +24289,7 @@
                     maxVal = parseObservedDateValue(val);
                     ctrl.$validate();
                 });
-            }
+    }
 
             function isValidDate(value) {
                 // Invalid Date: getTime() returns NaN
@@ -24721,7 +24721,7 @@
                         scope.$watch(attr.ngValue, function valueWatchAction(value) {
                             attr.$set('value', value);
                         });
-                    };
+        };
                 }
             }
         };
@@ -26508,7 +26508,7 @@
                         if (previousElements) {
                             previousElements.remove();
                             previousElements = null;
-                        }
+            }
                         if (childScope) {
                             childScope.$destroy();
                             childScope = null;
@@ -29054,7 +29054,7 @@
                             return ngModelCtrl.$viewValue.map(function (value) {
                                 return ngOptions.getTrackByValue(value);
                             });
-                        }
+            }
                     }, function () {
                         ngModelCtrl.$render();
                     });
@@ -29184,7 +29184,7 @@
                         ngModelCtrl.$setViewValue(nextValue);
                         ngModelCtrl.$render();
                     }
-                }
+        }
 
             }
         }
@@ -29872,8 +29872,8 @@
                             previousNode = $element[0],     // node that cloned nodes should be inserted after
                                                             // initialized to the comment node anchor
                             nextNode,
-                        // Same as lastBlockMap but it has the current state. It will become the
-                        // lastBlockMap on the next iteration.
+                            // Same as lastBlockMap but it has the current state. It will become the
+                            // lastBlockMap on the next iteration.
                             nextBlockMap = createMap(),
                             collectionLength,
                             key, value, // key/value of iteration
@@ -34099,7 +34099,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
                     // Handle special hash param, if needed
                     if (url !== null && params && params['#']) {
                         url += '#' + params['#'];
-                    }
+        }
 
                     url = appendBasePath(url, isHtml5, options.absolute);
 
@@ -34937,7 +34937,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
              *
              * `reload()` is just an alias for:
              * <pre>
-             * $state.transitionTo($state.current, $stateParams, { 
+             * $state.transitionTo($state.current, $stateParams, {
      *   reload: true, inherit: false, notify: true
      * });
              * </pre>
@@ -34959,7 +34959,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
              *
              * `reload()` is just an alias for:
              * <pre>
-             * $state.transitionTo($state.current, $stateParams, { 
+             * $state.transitionTo($state.current, $stateParams, {
      *   reload: true, inherit: false, notify: true
      * });
              * </pre>
@@ -35760,7 +35760,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
  *     "": {
  *       template: "<h1>HELLO!</h1>"
  *     }
- *   }    
+ *   }
  * })
      * </pre>
      *
@@ -35776,7 +35776,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
  *     "main": {
  *       template: "<h1>HELLO!</h1>"
  *     }
- *   }    
+ *   }
  * })
      * </pre>
      *
@@ -35799,7 +35799,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
  *     "data": {
  *       template: "<data_thing/>"
  *     }
- *   }    
+ *   }
  * })
      * </pre>
      *
@@ -39325,8 +39325,7 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
                 (angular.element($element).find('ul').eq(0).find('a'));
 
             switch (keyCode) {
-                case (40):
-                {
+                case (40): {
                     if (!angular.isNumber(self.selectedOption)) {
                         self.selectedOption = 0;
                     } else {
@@ -39336,8 +39335,7 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
                     }
                     break;
                 }
-                case (38):
-                {
+                case (38): {
                     if (!angular.isNumber(self.selectedOption)) {
                         self.selectedOption = elems.length - 1;
                     } else {
@@ -39476,8 +39474,7 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
                         var elems = dropdownCtrl.dropdownMenu.find('a');
 
                         switch (e.which) {
-                            case (40):
-                            { // Down
+                            case (40): { // Down
                                 if (!angular.isNumber(dropdownCtrl.selectedOption)) {
                                     dropdownCtrl.selectedOption = 0;
                                 } else {
@@ -39485,9 +39482,8 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
                                         dropdownCtrl.selectedOption : dropdownCtrl.selectedOption + 1;
                                 }
                                 break;
-                            }
-                            case (38):
-                            { // Up
+            }
+                            case (38): { // Up
                                 if (!angular.isNumber(dropdownCtrl.selectedOption)) {
                                     dropdownCtrl.selectedOption = elems.length - 1;
                                 } else {
@@ -39626,8 +39622,7 @@ angular.module('ui.bootstrap.dropdown')
                 (angular.element($element).find('ul').eq(0).find('a'));
 
             switch (keyCode) {
-                case (40):
-                {
+                case (40): {
                     if (!angular.isNumber(self.selectedOption)) {
                         self.selectedOption = 0;
                     } else {
@@ -39637,8 +39632,7 @@ angular.module('ui.bootstrap.dropdown')
                     }
                     break;
                 }
-                case (38):
-                {
+                case (38): {
                     if (!angular.isNumber(self.selectedOption)) {
                         self.selectedOption = elems.length - 1;
                     } else {
@@ -39789,8 +39783,7 @@ angular.module('ui.bootstrap.dropdown')
                         var elems = dropdownCtrl.dropdownMenu.find('a');
 
                         switch (e.which) {
-                            case (40):
-                            { // Down
+                            case (40): { // Down
                                 if (!angular.isNumber(dropdownCtrl.selectedOption)) {
                                     dropdownCtrl.selectedOption = 0;
                                 } else {
@@ -39799,8 +39792,7 @@ angular.module('ui.bootstrap.dropdown')
                                 }
                                 break;
             }
-                            case (38):
-                            { // Up
+                            case (38): { // Up
                                 if (!angular.isNumber(dropdownCtrl.selectedOption)) {
                                     dropdownCtrl.selectedOption = elems.length - 1;
                                 } else {
@@ -39808,7 +39800,7 @@ angular.module('ui.bootstrap.dropdown')
                                         0 : dropdownCtrl.selectedOption - 1;
                                 }
                                 break;
-                            }
+            }
                         }
                         elems[dropdownCtrl.selectedOption].focus();
                     }
@@ -39886,7 +39878,7 @@ angular.module('ui.bootstrap.stackedMap', [])
                         var keys = [];
                         for (var i = 0; i < stack.length; i++) {
                             keys.push(stack[i].key);
-                        }
+            }
                         return keys;
                     },
                     top: function () {
@@ -40284,16 +40276,14 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
                 var modal = openedWindows.top();
                 if (modal && modal.value.keyboard) {
                     switch (evt.which) {
-                        case 27:
-                        {
+                        case 27: {
                             evt.preventDefault();
                             $rootScope.$apply(function () {
                                 $modalStack.dismiss(modal.key, 'escape key press');
                             });
                             break;
                         }
-                        case 9:
-                        {
+                        case 9: {
                             $modalStack.loadFocusElementList(modal);
                             var focusChanged = false;
                             if (evt.shiftKey) {
@@ -40303,7 +40293,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
                             } else {
                                 if ($modalStack.isFocusInLastItem(evt)) {
                                     focusChanged = $modalStack.focusFirstFocusableElement();
-                                }
+                }
                             }
 
                             if (focusChanged) {
@@ -43069,7 +43059,7 @@ angular.module('ui.bootstrap.tabs')
             }
                         else {
                             elm.append(node);
-                        }
+            }
                     });
                 });
             }
@@ -43997,11 +43987,11 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position'])
 
                 scope.selectActive = function (matchIdx) {
                     scope.active = matchIdx;
-                };
+        };
 
                 scope.selectMatch = function (activeIdx) {
                     scope.select({activeIdx: activeIdx});
-                };
+        };
             }
         };
     })
@@ -44511,7 +44501,7 @@ angular.module('ui.bootstrap.typeahead')
 
                 scope.isActive = function (matchIdx) {
                     return scope.active == matchIdx;
-                };
+        };
 
                 scope.selectActive = function (matchIdx) {
                     scope.active = matchIdx;

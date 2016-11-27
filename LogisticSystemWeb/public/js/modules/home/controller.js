@@ -9,7 +9,6 @@ module.exports = [
 
         vm.user = null;
         vm.allUsers = [];
-        vm.deleteUser = deleteUser;
 
         initController();
 
@@ -19,70 +18,17 @@ module.exports = [
         }
 
         function loadCurrentUser() {
-            UserService.($rootScope.globals.currentUser.username)
+            UserService.getCurrentUser()
                 .then(function (user) {
-                    vm.user = user;
+                    vm.user = user.data;
                 });
         }
 
         function loadAllUsers() {
-            UserService.GetAll()
+            UserService.getAll()
                 .then(function (users) {
-                    vm.allUsers = users;
-                });
-        }
-
-        function deleteUser(id) {
-            UserService.Delete(id)
-                .then(function () {
-                    loadAllUsers();
+                    vm.allUsers = users.data;
                 });
         }
     }
 ];
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
-        .controller('HomeController', HomeController);
-
-    HomeController.$inject = ['UserService', '$rootScope'];
-    function HomeController(UserService, $rootScope) {
-        var vm = this;
-
-        vm.user = null;
-        vm.allUsers = [];
-        vm.deleteUser = deleteUser;
-
-        initController();
-
-        function initController() {
-            loadCurrentUser();
-            loadAllUsers();
-        }
-
-        function loadCurrentUser() {
-            UserService.GetByUsername($rootScope.globals.currentUser.username)
-                .then(function (user) {
-                    vm.user = user;
-                });
-        }
-
-        function loadAllUsers() {
-            UserService.GetAll()
-                .then(function (users) {
-                    vm.allUsers = users;
-                });
-        }
-
-        function deleteUser(id) {
-            UserService.Delete(id)
-                .then(function () {
-                    loadAllUsers();
-                });
-        }
-    }
-
-})();

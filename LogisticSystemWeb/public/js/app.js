@@ -13,6 +13,7 @@ require('./common/flash');
 require('./modules/home');
 require('./modules/user');
 require('./modules/login');
+require('./modules/register');
 
 domready(function () {
     angular
@@ -27,6 +28,7 @@ domready(function () {
             'Flash',
 
             'Login',
+            'Registration',
             'Home',
             'User'
         ]);

@@ -19,6 +19,9 @@ module.exports = function () {
         'localStorageService',
         '$state',
         function ($http, $q, localStorageService, $state) {
+            /*$http.defaults.headers.common['Authorization'] = 'Basic ' +
+             localStorageService.get('globals').currentUser.authdata ? localStorageService.get('globals').currentUser.authdata : "";
+             */
             var respond = function (deferred, callback) {
                 return function (data, status, headers) {
 

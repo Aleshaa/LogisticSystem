@@ -7,7 +7,11 @@ module.exports = [
             .state('users', {
                 url: '/users',
                 controller: 'UserController',
-                template: require('./template.html')
+                controllerAs: 'vm',
+                template: require('./template.html'),
+                data: {
+                    authorizedRoles: ['admin']
+                }
             });
     }
 ];

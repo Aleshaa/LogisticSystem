@@ -1,35 +1,54 @@
 'use strict';
 
 module.exports = [
-    'requestService',
-    function (requestService) {
+    '$http',
+    'localStorageService',
+    function ($http, localStorageService) {
+        var service = {};
 
-        this.getAll = function () {
-            return requestService
-                .get('/rest/get/users')
-                .then(function (response) {
-                        return response;
-                    },
-                    handleError('Error getting all users'))
-        };
+        var REST_SERVICE_URI = 'http://localhost:8080/';
 
-        this.getById = function (id) {
-            return requestService
-                .get('/rest/get/user/', id)
-                .then(function (response) {
-                        return response;
-                    },
-                    handleError('Error getting user by id'))
-        };
+        var authData = localStorageService.get('globals') ? localStorageService.get('globals').currentUser.authdata : "";
 
-        this.getCurrentUser = function () {
-            return requestService
-                .get('/rest/get/currentUser')
-                .then(function (response) {
-                        return response;
-                    },
-                    handleError('Error getting user by username'))
-        };
+        $http.defaults.headers.common['Authorization'] = 'Basic ' + authData;
+
+        service.getAll = getAll;
+        service.getCurrentUser = getCurrentUser;
+        service.create = create;
+        service.update = update;
+        service.Delete = Delete;
+
+        return service;
+
+        function getAll() {
+            return $http.get(REST_SERVICE_URI + 'rest/get/role/users').then(handleSuccess,
+                handleError('Ошибка при получении всех пользователей'));
+        }
+
+        function getCurrentUser() {
+            return $http.get(REST_SERVICE_URI + 'rest/get/currentUser').then(handleSuccess,
+                handleError('Ошибка при получении текущего пользователя'));
+        }
+
+        function create(user) {
+            return $http.post(REST_SERVICE_URI + 'user', user).then(handleSuccess,
+                handleError('Ошибка регистрации пользователя'));
+        }
+
+        function update(user) {
+            return $http.put('/api/users/' + user.id, user).then(handleSuccess, handleError('Error updating user'));
+        }
+
+        function Delete(id) {
+            return $http.delete('/api/users/' + id).then(handleSuccess, handleError('Error deleting user'));
+        }
+
+        function handleSuccess(res) {
+            return {
+                success: true,
+                data: res.data
+            };
+        }
 
         function handleError(error) {
             return function () {

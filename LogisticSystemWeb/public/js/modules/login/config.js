@@ -7,7 +7,15 @@ module.exports = [
             .state('login', {
                 url: '/login',
                 template: require('./template.html'),
-                controller: 'LoginController'
+                controller: 'LoginController',
+                controllerAs: 'vm'
+            })
+            .state('logout', {
+                url: '/logout'
+            })
+            .state('forbidden', {
+                url: '/forbidden',
+                template: require('./forbidden-template.html')
             });
     }
 ];

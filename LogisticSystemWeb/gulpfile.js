@@ -20,7 +20,8 @@ var cssFiles = [
     './public/bower_components/angular-xeditable/dist/css/xeditable.css',
     './public/bower_components/ng-dialog/css/ngDialog.css',
     './public/bower_components/ng-dialog/css/ngDialog-theme-default.css',
-    './public/bower_components/angularjs-slider/dist/rzslider.css'
+    './public/bower_components/angularjs-slider/dist/rzslider.css',
+    './public/bower_components/bootstrap/dist/css/bootstrap.min.css'
 ];
 
 gulp.task('concat-js-libs', function () {

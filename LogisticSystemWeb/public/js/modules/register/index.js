@@ -3,7 +3,7 @@
 var angular = require('angular');
 
 angular
-    .module('Login', [])
+    .module('Registration', [])
     .config(require('./config'))
     .run(require('../run'))
-    .controller('LoginController', require('./controller'));
+    .controller('RegistrationController', require('./controller'));
