@@ -1,6 +1,7 @@
 package edu.bsuir.logistic.rest.dao;
 
 import edu.bsuir.logistic.rest.model.Buy;
+import edu.bsuir.logistic.rest.model.Purchase;
 
 import java.util.List;
 
@@ -12,6 +13,10 @@ public interface BuyDao {
     Buy findById(Integer id);
 
     List<Buy> findAllBuys();
+
+    List<Buy> getCompletedBuys();
+
+    List<Buy> getUncompletedBuys();
 
     void save(Buy buy);
 

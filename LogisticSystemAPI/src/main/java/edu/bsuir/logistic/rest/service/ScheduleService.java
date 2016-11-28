@@ -2,6 +2,7 @@ package edu.bsuir.logistic.rest.service;
 
 import edu.bsuir.logistic.rest.model.Buy;
 import edu.bsuir.logistic.rest.model.Purchase;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @Service("scheduleService")
 public class ScheduleService {
+
+    private static final Logger LOGGER = Logger.getLogger(ScheduleService.class);
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat dateFormatAddition = new SimpleDateFormat("yyyy-MM-dd");
@@ -27,10 +30,13 @@ public class ScheduleService {
         this.buyService = buyService;
     }
 
+    /**
+     * Check condition of purchases and save buys if is necessary
+     * @throws ParseException
+     */
     @Scheduled(cron = "${cron.expression}")
-    public void demoServiceMethod() throws ParseException {
+    public void saveBuyForPurchase() throws ParseException {
 
-        // TODO: 28.11.2016 Check logic. Necessary to complete
         List<Purchase> purchaseList = purchaseService.findAll();
         List<Buy> buyList = buyService.findAll();
         for (Purchase purchase : purchaseList) {
@@ -41,19 +47,24 @@ public class ScheduleService {
                 Date todayDate = dateFormatAddition.parse(dateFormat.format(new Date()));
                 int diffInDays = (int) ((todayDate.getTime() - buyDate.getTime()) / (1000 * 60 * 60 * 24));
                 if (buy.getClient().getIdUser().equals(purchase.getClient().getIdUser()) &&
-                        buy.getGoods().getIdGoods().equals(purchase.getGoods().getIdGoods()) && buy.isCompleted()) {
-                    System.out.println("diffInDays = " + diffInDays);
+                        buy.getGoods().getIdGoods().equals(purchase.getGoods().getIdGoods()) /*&& buy.isCompleted()*/) {
                     if (diffInDays < lastDiffInDays)
                         lastDiffInDays = diffInDays;
                     flag = true;
                 }
             }
-            if (!flag || lastDiffInDays >= purchase.getFrequency()) {
-                System.out.println("Ни разу не поставляли или просрочили поставку: тоже добавляем.");
+            if (purchase.isConfirmed() && (!flag || lastDiffInDays >= purchase.getFrequency())) {
+                Buy buy = new Buy();
+                buy.setClient(purchase.getClient());
+                buy.setDate(dateFormatAddition.parse(dateFormat.format(new Date())));
+                buy.setGoods(purchase.getGoods());
+                buy.setQuantity(purchase.getQuantity());
+                buyService.saveBuy(buy);
+                LOGGER.info("Ни разу не поставляли/просрочили поставку/нужное время: добавляем.");
             } else
-                System.out.println("Еще не настало время");
+                LOGGER.info("Еще не настало время");
         }
-        System.out.println("Method executed at every 1 minutes. Current time is :: " + new Date());
+        LOGGER.info("Method executed at every 10 minutes. Current time is :: " + new Date());
     }
 
 }

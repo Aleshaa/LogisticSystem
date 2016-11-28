@@ -46,6 +46,30 @@ public class PurchaseController {
         return new ResponseEntity<>(purchases, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Confirmed Purchases--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/purchases/confirm", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Purchase>> listAllConfirmedPurchases() {
+        List<Purchase> purchases = purchaseService.getAllConfirmed();
+        if (purchases.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(purchases, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All Confirmed Purchases--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/purchases/noconfirm", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Purchase>> listAllUnconfirmedPurchases() {
+        List<Purchase> purchases = purchaseService.getAllUnconfirmed();
+        if (purchases.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(purchases, HttpStatus.OK);
+    }
+
 
     //-------------------Retrieve Single Purchase--------------------------------------------------------
 

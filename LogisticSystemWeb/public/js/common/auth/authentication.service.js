@@ -16,6 +16,7 @@ module.exports = [
         service.SetCredentials = SetCredentials;
         service.ClearCredentials = ClearCredentials;
         service.isAuth = isAuth;
+        service.getAuthUser = getAuthUser;
         service.checkRole = checkRole;
 
         return service;
@@ -57,12 +58,19 @@ module.exports = [
         }
 
         function isAuth() {
-            return localStorageService.get('globals');
+            return localStorageService.get('globals') ? true : false;
+        }
+
+        function getAuthUser() {
+            return localStorageService.get('globals') ? localStorageService.get('globals').currentUser : "";
         }
 
         function checkRole(authRoles) {
-
-            var currentUser = localStorageService.get('globals').currentUser;
+            var currentUser = {
+                role: ""
+            };
+            if (localStorageService.get('globals'))
+                currentUser = localStorageService.get('globals').currentUser;
             return authRoles.indexOf(currentUser.role) != -1 || authRoles == [];
         }
 

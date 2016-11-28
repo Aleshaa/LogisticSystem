@@ -16,10 +16,12 @@
              ng-class="{'text-align-center': !isCollapsed}"
              uib-collapse="isCollapsed">
             <ul class="nav navbar-nav navbar-right margin-right-5">
-                <li><a ui-sref="#">Page1</a></li>
-                <li><a ui-sref="#">Page2</a></li>
+                <li><a ng-if="isAdmin()" href="#/users">Пользователи</a></li>
+                <li><a href="#/goods">Товары</a></li>
                 <li><a ui-sref="#">Page3</a></li>
-                <li ng-click="logout()"><a href="#/logout" class="cursor-pointer">Выйти</a></li>
+                <li ng-click="logout()"><a ng-if="isAdmin()" href="#/logout" class="cursor-pointer">Выйти</a></li>
+                <li ng-click="logout()"><a ng-if="isUser()" href="#/logout" class="cursor-pointer">{{user.name}} |
+                    Выйти</a></li>
             </ul>
         </div>
     </nav>

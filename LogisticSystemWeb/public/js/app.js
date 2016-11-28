@@ -14,6 +14,7 @@ require('./modules/home');
 require('./modules/user');
 require('./modules/login');
 require('./modules/register');
+require('./modules/goods');
 
 domready(function () {
     angular
@@ -30,7 +31,8 @@ domready(function () {
             'Login',
             'Registration',
             'Home',
-            'User'
+            'User',
+            'Goods'
         ]);
     angular.bootstrap(document, ['App']);
 });

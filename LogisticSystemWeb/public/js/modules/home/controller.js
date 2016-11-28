@@ -14,20 +14,12 @@ module.exports = [
 
         function initController() {
             loadCurrentUser();
-            loadAllUsers();
         }
 
         function loadCurrentUser() {
             UserService.getCurrentUser()
                 .then(function (user) {
                     vm.user = user.data;
-                });
-        }
-
-        function loadAllUsers() {
-            UserService.getAll()
-                .then(function (users) {
-                    vm.allUsers = users.data;
                 });
         }
     }

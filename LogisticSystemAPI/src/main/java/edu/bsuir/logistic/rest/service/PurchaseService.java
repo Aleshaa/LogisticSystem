@@ -21,4 +21,8 @@ public interface PurchaseService {
 
     List<Purchase> findAll();
 
+    List<Purchase> getAllConfirmed();
+
+    List<Purchase> getAllUnconfirmed();
+
 }

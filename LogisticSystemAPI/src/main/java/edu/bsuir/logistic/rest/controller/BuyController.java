@@ -46,6 +46,29 @@ public class BuyController {
         return new ResponseEntity<>(buys, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Completed Buys--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/completed", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> listAllCompletedBuys() {
+        List<Buy> buys = buyService.getCompleted();
+        if (buys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(buys, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All Disabled Buys--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/nocompleted", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> listAllDisabledBuys() {
+        List<Buy> buys = buyService.getDisabled();
+        if (buys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(buys, HttpStatus.OK);
+    }
 
     //-------------------Retrieve Single Buy--------------------------------------------------------
 
