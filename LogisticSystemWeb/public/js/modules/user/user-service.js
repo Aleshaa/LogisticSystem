@@ -40,7 +40,7 @@ module.exports = [
         }
 
         function Delete(id) {
-            return $http.delete('/api/users/' + id).then(handleSuccess, handleError('Error deleting user'));
+            return $http.delete(REST_SERVICE_URI + 'rest/delete/user/' + id).then(handleSuccess, handleError('Error deleting user'));
         }
 
         function handleSuccess(res) {

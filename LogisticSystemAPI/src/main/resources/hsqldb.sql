@@ -87,6 +87,7 @@ CREATE TABLE Buy (
   idClient INT   NOT NULL,
   date     DATE  NOT NULL,
   quantity FLOAT NOT NULL,
+  completed TINYINT(1) DEFAULT 0,
   CONSTRAINT idGoodsBuy FOREIGN KEY (idGoods) REFERENCES Goods (idGoods)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
@@ -101,6 +102,7 @@ CREATE TABLE Purchase (
   idClient   INT NOT NULL,
   frequency  INT          NOT NULL,
   quantity   FLOAT        NOT NULL,
+  confirmed  TINYINT(1) DEFAULT 0,
   CONSTRAINT idGoodsPurchase FOREIGN KEY (idGoods) REFERENCES Goods (idGoods)
     ON DELETE CASCADE
     ON UPDATE CASCADE,

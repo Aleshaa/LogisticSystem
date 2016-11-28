@@ -39,6 +39,9 @@ public class Buy implements Serializable {
     @Column(name = "quantity", nullable = false)
     private float quantity;
 
+    @Column(name = "completed")
+    private boolean completed;
+
     public Buy() {
         this.idBuy = 0;
     }
@@ -89,5 +92,13 @@ public class Buy implements Serializable {
 
     public void setQuantity(float quantity) {
         this.quantity = quantity;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }

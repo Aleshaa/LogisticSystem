@@ -50,4 +50,14 @@ public class PurchaseServiceImpl implements PurchaseService {
         return dao.findAllPurchases();
     }
 
+    @Override
+    public List<Purchase> getAllConfirmed() {
+        return dao.getConfirmedPurchases();
+    }
+
+    @Override
+    public List<Purchase> getAllUnconfirmed() {
+        return dao.getUnconfirmedPurchases();
+    }
+
 }

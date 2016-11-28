@@ -13,6 +13,10 @@ public interface PurchaseDao {
 
     List<Purchase> findAllPurchases();
 
+    List<Purchase> getConfirmedPurchases();
+
+    List<Purchase> getUnconfirmedPurchases();
+
     void save(Purchase purchase);
 
     void updatePurchase(Purchase purchase);

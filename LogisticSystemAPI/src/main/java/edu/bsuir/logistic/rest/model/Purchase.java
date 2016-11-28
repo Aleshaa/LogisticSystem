@@ -35,6 +35,9 @@ public class Purchase implements Serializable {
     @Column(name = "quantity", nullable = false)
     private float quantity;
 
+    @Column(name = "confirmed")
+    private boolean confirmed;
+
     public Purchase() {
         this.idPurchase = 0;
     }
@@ -85,5 +88,13 @@ public class Purchase implements Serializable {
 
     public void setQuantity(float quantity) {
         this.quantity = quantity;
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
     }
 }
