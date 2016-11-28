@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -27,17 +28,32 @@ public class ScheduleService {
     }
 
     @Scheduled(cron = "${cron.expression}")
-    public void demoServiceMethod() {
+    public void demoServiceMethod() throws ParseException {
 
-        // TODO: 28.11.2016 Add logic
+        // TODO: 28.11.2016 Check logic. Necessary to complete
         List<Purchase> purchaseList = purchaseService.findAll();
         List<Buy> buyList = buyService.findAll();
-        for (Purchase purchase : purchaseList)
+        for (Purchase purchase : purchaseList) {
+            boolean flag = false;
+            int lastDiffInDays = 1000;
             for (Buy buy : buyList) {
-                String buyDateStr = dateFormat.format(buy.getDate());
-                String todayDateStr = dateFormat.format(new Date());
+                Date buyDate = dateFormatAddition.parse(dateFormat.format(buy.getDate()));
+                Date todayDate = dateFormatAddition.parse(dateFormat.format(new Date()));
+                int diffInDays = (int) ((todayDate.getTime() - buyDate.getTime()) / (1000 * 60 * 60 * 24));
+                if (buy.getClient().getIdUser().equals(purchase.getClient().getIdUser()) &&
+                        buy.getGoods().getIdGoods().equals(purchase.getGoods().getIdGoods()) && buy.isCompleted()) {
+                    System.out.println("diffInDays = " + diffInDays);
+                    if (diffInDays < lastDiffInDays)
+                        lastDiffInDays = diffInDays;
+                    flag = true;
+                }
             }
-        System.out.println("Method executed at every 5 seconds. Current time is :: " + new Date());
+            if (!flag || lastDiffInDays >= purchase.getFrequency()) {
+                System.out.println("Ни разу не поставляли или просрочили поставку: тоже добавляем.");
+            } else
+                System.out.println("Еще не настало время");
+        }
+        System.out.println("Method executed at every 1 minutes. Current time is :: " + new Date());
     }
 
 }
