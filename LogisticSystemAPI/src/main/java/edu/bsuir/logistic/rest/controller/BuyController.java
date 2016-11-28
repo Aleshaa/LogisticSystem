@@ -115,6 +115,26 @@ public class BuyController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    //------------------- Proof of buy is complete --------------------------------------------------------
+
+    @RequestMapping(value = "/rest/update/buy/{id}/complete", method = RequestMethod.PUT)
+    public ResponseEntity<Void> updateBuy(@PathVariable("id") int id) {
+        System.out.println("Updating Buy " + id);
+
+        Buy currentBuy = buyService.findById(id);
+
+        if (currentBuy == null) {
+            LOGGER.debug("Buy with id " + id + " not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        currentBuy.setCompleted(true);
+        buyService.updateBuy(currentBuy);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
     //------------------- Delete a Buy --------------------------------------------------------
 
     @RequestMapping(value = "/rest/delete/buy/{id}", method = RequestMethod.DELETE)

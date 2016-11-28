@@ -112,6 +112,25 @@ public class PurchaseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    //------------------- Change status of confirmation ----------------------------------------------------------
+
+    @RequestMapping(value = "/rest/update/purchase/{id}/confirm", method = RequestMethod.PUT)
+    public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id) {
+        System.out.println("Updating Purchase " + id);
+
+        Purchase currentPurchase = purchaseService.findById(id);
+
+        if (currentPurchase == null) {
+            LOGGER.debug("Purchase with id " + id + " not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        currentPurchase.setConfirmed(true);
+
+        purchaseService.updatePurchase(currentPurchase);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     //------------------- Delete a Address --------------------------------------------------------
 
     @RequestMapping(value = "/rest/delete/purchase/{id}", method = RequestMethod.DELETE)
