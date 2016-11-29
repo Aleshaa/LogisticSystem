@@ -2,12 +2,13 @@ package edu.bsuir.logistic.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -45,11 +46,12 @@ public class Address implements Serializable {
     @Column(name = "Number", nullable = false)
     private int Number;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(name = "m2m_goods_address",
             joinColumns = {@JoinColumn(name = "idAddress")},
             inverseJoinColumns = {@JoinColumn(name = "idGoods")})
-    private Set<Goods> goodsSet = new HashSet<>();
+    @Fetch(FetchMode.JOIN)
+    private Set<Goods> goodsSet;
 
     public Address() {
         this.idAddress = 0;
@@ -119,5 +121,17 @@ public class Address implements Serializable {
 
     public void setGoodsSet(Set<Goods> goodsSet) {
         this.goodsSet = goodsSet;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Address && (obj == this || this.idAddress.equals(((Address) obj).idAddress));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + idAddress.hashCode();
+        return result;
     }
 }

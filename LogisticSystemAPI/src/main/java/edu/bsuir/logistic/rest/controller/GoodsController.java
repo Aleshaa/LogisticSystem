@@ -1,7 +1,9 @@
 package edu.bsuir.logistic.rest.controller;
 
+import edu.bsuir.logistic.rest.model.Address;
 import edu.bsuir.logistic.rest.model.Goods;
 import edu.bsuir.logistic.rest.model.User;
+import edu.bsuir.logistic.rest.service.AddressService;
 import edu.bsuir.logistic.rest.service.GoodsService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Alesha on 07.11.2016.
@@ -25,12 +29,30 @@ public class GoodsController {
     @Autowired
     GoodsService goodsService;
 
+    @Autowired
+    AddressService addressService;
+
     //-------------------Retrieve All Goods--------------------------------------------------------
 
     @RequestMapping(value = "/rest/get/goods", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Goods>> listAllGoods() {
         List<Goods> goods = goodsService.findAll();
+        if (goods.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(goods, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All Goods For Current Address--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/goods/address/{id}", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Goods>> listAllAddressForCurrentGoods(@PathVariable("id") int id) {
+        Address address = addressService.findById(id);
+
+        List<Goods> goods = new ArrayList<>();
+        goods.addAll(address.getGoodsSet());
         if (goods.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -53,7 +75,7 @@ public class GoodsController {
     }
 
 
-    //-------------------Create a Goods--------------------------------------------------------
+    //------------------- Create a Goods --------------------------------------------------------
 
     @RequestMapping(value = "/rest/create/goods", method = RequestMethod.POST)
     public ResponseEntity<Void> createGoods(@RequestBody Goods goods, UriComponentsBuilder ucBuilder) {
@@ -64,6 +86,28 @@ public class GoodsController {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(ucBuilder.path("/goods/{id}").buildAndExpand(goods.getIdGoods()).toUri());
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
+    }
+
+    //------------------- Add Goods to Address --------------------------------------------------------
+
+    @RequestMapping(value = "/rest/add/goods/{idGoods}/address/{idAddress}", method = RequestMethod.POST)
+    public ResponseEntity<Void> addGoodsToAddress(@PathVariable("idGoods") int idGoods,
+                                                  @PathVariable("idAddress") int idAddress) {
+
+        Goods goods = goodsService.findById(idGoods);
+        Address address = addressService.findById(idAddress);
+
+        if (goods.getAddressSet().contains(address)) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
+        Set<Address> addressSet = goods.getAddressSet();
+        addressSet.add(address);
+        goods.setAddressSet(addressSet);
+
+        goodsService.updateGoods(goods);
+
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 
