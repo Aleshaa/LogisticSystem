@@ -96,7 +96,7 @@ public class PurchaseController {
         User client = userService.findById(idClient);
         Goods goods = goodsService.findById(idGoods);
 
-        if (client == null || goods == null) {
+        if (client == null || goods == null || client.getAddressSet().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         purchase.setClient(client);

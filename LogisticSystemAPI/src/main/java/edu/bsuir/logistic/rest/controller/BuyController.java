@@ -95,12 +95,9 @@ public class BuyController {
 
         Goods buyedGoods = goodsService.findById(idGoods);
         if (buyedGoods.getQuantity() - buy.getQuantity() >= 0) {
-            buyedGoods.setQuantity(buyedGoods.getQuantity() - buy.getQuantity());
             buy.setClient(userService.findById(idClient));
             buy.setGoods(buyedGoods);
             buyService.saveBuy(buy);
-
-            goodsService.updateGoods(buyedGoods);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(ucBuilder.path("/buy/{id}").buildAndExpand(buy.getIdBuy()).toUri());
@@ -150,11 +147,17 @@ public class BuyController {
             LOGGER.debug("Buy with id " + id + " not found");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        Goods buyedGoods = goodsService.findById(currentBuy.getGoods().getIdGoods());
+        if (buyedGoods.getQuantity() - currentBuy.getQuantity() >= 0) {
+            buyedGoods.setQuantity(buyedGoods.getQuantity() - currentBuy.getQuantity());
+            goodsService.updateGoods(buyedGoods);
 
-        currentBuy.setCompleted(true);
-        buyService.updateBuy(currentBuy);
+            currentBuy.setCompleted(true);
+            buyService.updateBuy(currentBuy);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     }
 

@@ -24,10 +24,13 @@ public class ScheduleService {
 
     private final BuyService buyService;
 
+    private final GoodsService goodsService;
+
     @Autowired
-    public ScheduleService(PurchaseService purchaseService, BuyService buyService) {
+    public ScheduleService(PurchaseService purchaseService, BuyService buyService, GoodsService goodsService) {
         this.purchaseService = purchaseService;
         this.buyService = buyService;
+        this.goodsService = goodsService;
     }
 
     /**
