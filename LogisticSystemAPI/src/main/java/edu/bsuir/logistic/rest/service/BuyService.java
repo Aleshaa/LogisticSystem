@@ -20,4 +20,8 @@ public interface BuyService {
     void deleteAll();
 
     List<Buy> findAll();
+
+    List<Buy> getCompleted();
+
+    List<Buy> getDisabled();
 }

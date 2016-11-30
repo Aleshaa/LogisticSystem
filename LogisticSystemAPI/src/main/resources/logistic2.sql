@@ -126,11 +126,12 @@ CREATE TABLE IF NOT EXISTS `Supply` (
   COLLATE = utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `Buy` (
-  `idBuy`    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idGoods`  INT UNSIGNED NOT NULL,
-  `idClient` INT UNSIGNED NOT NULL,
-  `date`     DATE         NOT NULL,
-  `quantity` FLOAT        NOT NULL,
+  `idBuy`     INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idGoods`   INT UNSIGNED NOT NULL,
+  `idClient`  INT UNSIGNED NOT NULL,
+  `completed` TINYINT(1)            DEFAULT 0,
+  `date`      DATE         NOT NULL,
+  `quantity`  FLOAT        NOT NULL,
   UNIQUE INDEX `idBuy_UNIQUE` (`idBuy` ASC),
   CONSTRAINT `idGoodsBuy` FOREIGN KEY (`idGoods`) REFERENCES `Goods` (`idGoods`)
     ON DELETE CASCADE
@@ -148,6 +149,7 @@ CREATE TABLE IF NOT EXISTS `Purchase` (
   `idPurchase` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `idGoods`    INT UNSIGNED NOT NULL,
   `idClient`   INT UNSIGNED NOT NULL,
+  `confirmed`  TINYINT(1)            DEFAULT 0,
   `frequency`  INT          NOT NULL,
   `quantity`   FLOAT        NOT NULL,
   UNIQUE INDEX `idPurchase_UNIQUE` (`idPurchase` ASC),

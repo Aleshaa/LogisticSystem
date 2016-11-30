@@ -50,4 +50,14 @@ public class BuyServiceImpl implements BuyService {
         return dao.findAllBuys();
     }
 
+    @Override
+    public List<Buy> getCompleted() {
+        return dao.getCompletedBuys();
+    }
+
+    @Override
+    public List<Buy> getDisabled() {
+        return dao.getUncompletedBuys();
+    }
+
 }

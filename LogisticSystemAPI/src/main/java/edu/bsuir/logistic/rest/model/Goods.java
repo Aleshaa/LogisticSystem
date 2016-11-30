@@ -9,7 +9,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -40,11 +39,12 @@ public class Goods implements Serializable {
     @Column(name = "price", nullable = false)
     private float price;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(name = "m2m_goods_address",
             joinColumns = {@JoinColumn(name = "idGoods")},
             inverseJoinColumns = {@JoinColumn(name = "idAddress")})
-    private Set<Address> addressSet = new HashSet<Address>();
+    @Fetch(FetchMode.JOIN)
+    private Set<Address> addressSet;
 
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "goods")
     @Fetch(FetchMode.JOIN)
@@ -144,5 +144,17 @@ public class Goods implements Serializable {
 
     public void setSupplies(Set<Supply> supplies) {
         this.supplies = supplies;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Goods && (obj == this || this.idGoods.equals(((Goods) obj).idGoods));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + idGoods.hashCode();
+        return result;
     }
 }

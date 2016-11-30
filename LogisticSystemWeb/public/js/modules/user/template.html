@@ -1,0 +1,9 @@
+<div class="container" style="margin-top:50px">
+    <h3>Все зарегистрированные на данный момент пользователи:</h3>
+    <ul>
+        <li ng-repeat="user in vm.allUsers">
+            {{user.username}} ({{user.name}})
+            <button type="button" ng-click="vm.remove(user.idUser)" class="btn btn-danger custom-width">Удалить</button>
+        </li>
+    </ul>
+</div>

@@ -46,6 +46,30 @@ public class PurchaseController {
         return new ResponseEntity<>(purchases, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Confirmed Purchases--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/purchases/confirm", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Purchase>> listAllConfirmedPurchases() {
+        List<Purchase> purchases = purchaseService.getAllConfirmed();
+        if (purchases.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(purchases, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All Confirmed Purchases--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/purchases/noconfirm", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Purchase>> listAllUnconfirmedPurchases() {
+        List<Purchase> purchases = purchaseService.getAllUnconfirmed();
+        if (purchases.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(purchases, HttpStatus.OK);
+    }
+
 
     //-------------------Retrieve Single Purchase--------------------------------------------------------
 
@@ -72,7 +96,7 @@ public class PurchaseController {
         User client = userService.findById(idClient);
         Goods goods = goodsService.findById(idGoods);
 
-        if (client == null || goods == null) {
+        if (client == null || goods == null || client.getAddressSet().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         purchase.setClient(client);
@@ -107,6 +131,25 @@ public class PurchaseController {
 
         currentPurchase.setQuantity(purchase.getQuantity());
         currentPurchase.setFrequency(purchase.getFrequency());
+
+        purchaseService.updatePurchase(currentPurchase);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    //------------------- Change status of confirmation ----------------------------------------------------------
+
+    @RequestMapping(value = "/rest/update/purchase/{id}/confirm", method = RequestMethod.PUT)
+    public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id) {
+        System.out.println("Updating Purchase " + id);
+
+        Purchase currentPurchase = purchaseService.findById(id);
+
+        if (currentPurchase == null) {
+            LOGGER.debug("Purchase with id " + id + " not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        currentPurchase.setConfirmed(true);
 
         purchaseService.updatePurchase(currentPurchase);
         return new ResponseEntity<>(HttpStatus.OK);

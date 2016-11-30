@@ -25,9 +25,24 @@ public class PurchaseDaoImpl extends AbstractDao<Integer, Purchase> implements P
     public List<Purchase> findAllPurchases() {
         Criteria criteria = createEntityCriteria().addOrder(Order.asc("idPurchase"));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//To avoid duplicates.
-        List<Purchase> purchaseList = (List<Purchase>) criteria.list();
 
-        return purchaseList;
+        return (List<Purchase>) criteria.list();
+    }
+
+    @Override
+    public List<Purchase> getConfirmedPurchases() {
+        Criteria crit = createEntityCriteria();
+        crit.add(Restrictions.eq("confirmed", true));
+        crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//To avoid duplicates.
+        return (List<Purchase>) crit.list();
+    }
+
+    @Override
+    public List<Purchase> getUnconfirmedPurchases() {
+        Criteria crit = createEntityCriteria();
+        crit.add(Restrictions.eq("confirmed", false));
+        crit.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//To avoid duplicates.
+        return (List<Purchase>) crit.list();
     }
 
     @Override

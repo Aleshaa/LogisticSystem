@@ -46,6 +46,29 @@ public class BuyController {
         return new ResponseEntity<>(buys, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Completed Buys--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/completed", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> listAllCompletedBuys() {
+        List<Buy> buys = buyService.getCompleted();
+        if (buys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(buys, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All Disabled Buys--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/nocompleted", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> listAllDisabledBuys() {
+        List<Buy> buys = buyService.getDisabled();
+        if (buys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(buys, HttpStatus.OK);
+    }
 
     //-------------------Retrieve Single Buy--------------------------------------------------------
 
@@ -72,12 +95,9 @@ public class BuyController {
 
         Goods buyedGoods = goodsService.findById(idGoods);
         if (buyedGoods.getQuantity() - buy.getQuantity() >= 0) {
-            buyedGoods.setQuantity(buyedGoods.getQuantity() - buy.getQuantity());
             buy.setClient(userService.findById(idClient));
             buy.setGoods(buyedGoods);
             buyService.saveBuy(buy);
-
-            goodsService.updateGoods(buyedGoods);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(ucBuilder.path("/buy/{id}").buildAndExpand(buy.getIdBuy()).toUri());
@@ -113,6 +133,32 @@ public class BuyController {
             return new ResponseEntity<>(HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    //------------------- Proof of buy is complete --------------------------------------------------------
+
+    @RequestMapping(value = "/rest/update/buy/{id}/complete", method = RequestMethod.PUT)
+    public ResponseEntity<Void> updateBuy(@PathVariable("id") int id) {
+        System.out.println("Updating Buy " + id);
+
+        Buy currentBuy = buyService.findById(id);
+
+        if (currentBuy == null) {
+            LOGGER.debug("Buy with id " + id + " not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Goods buyedGoods = goodsService.findById(currentBuy.getGoods().getIdGoods());
+        if (buyedGoods.getQuantity() - currentBuy.getQuantity() >= 0) {
+            buyedGoods.setQuantity(buyedGoods.getQuantity() - currentBuy.getQuantity());
+            goodsService.updateGoods(buyedGoods);
+
+            currentBuy.setCompleted(true);
+            buyService.updateBuy(currentBuy);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
     }
 
     //------------------- Delete a Buy --------------------------------------------------------

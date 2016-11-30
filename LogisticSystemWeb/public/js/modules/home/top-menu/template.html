@@ -1,0 +1,29 @@
+<div ng-show="isAuth()" class="container-fluid">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-header">
+            <button type="button"
+                    ng-click="isCollapsed = !isCollapsed"
+                    class="navbar-toggle collapsed">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand">LogisticSystem</a>
+        </div>
+        <div id="navbar"
+             class="navbar-collapse collapse"
+             ng-class="{'text-align-center': !isCollapsed}"
+             uib-collapse="isCollapsed">
+            <ul class="nav navbar-nav navbar-right margin-right-5">
+                <li><a ng-if="isAdmin()" href="#/users">Пользователи</a></li>
+                <li><a href="#/goods">Товары</a></li>
+                <li><a ng-if="isAdmin()" href="#/addresses">Склады</a></li>
+                <li><a ng-if="isAdmin()" href="#/suppliers">Поставщики</a></li>
+                <li ng-click="logout()"><a ng-if="isAdmin()" href="#/logout" class="cursor-pointer">Выйти</a></li>
+                <li ng-click="logout()"><a ng-if="isUser()" href="#/logout" class="cursor-pointer">{{user.name}} |
+                    Выйти</a></li>
+            </ul>
+        </div>
+    </nav>
+</div>
