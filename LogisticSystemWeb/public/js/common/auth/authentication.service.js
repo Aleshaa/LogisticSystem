@@ -6,7 +6,8 @@ module.exports = [
     '$http',
     'localStorageService',
     '$rootScope',
-    function ($http, localStorageService, $rootScope) {
+    'userService',
+    function ($http, localStorageService, $rootScope, userService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080';
@@ -17,6 +18,7 @@ module.exports = [
         service.ClearCredentials = ClearCredentials;
         service.isAuth = isAuth;
         service.getAuthUser = getAuthUser;
+        service.getCurrentUser = getCurrentUser;
         service.checkRole = checkRole;
 
         return service;
@@ -39,6 +41,18 @@ module.exports = [
                     callback(response);
                 });
 
+        }
+
+        function getCurrentUser() {
+            userService.getCurrentUser()
+                .then(function (response) {
+                    if (response.success) {
+                        return response.data;
+                    } else {
+                        console.log("Что-то пошло не так");
+                        return {};
+                    }
+                });
         }
 
         function SetCredentials(username, password) {

@@ -2,51 +2,40 @@
     <div class="row">
         <div class="col-sm-2">
             <ul id="sidebar" class="nav nav-stacked affix">
-                <li><a href="#">Page1</a></li>
-                <li><a href="#">Page2</a></li>
-                <li><a href="#">Page3</a></li>
+                <li><a href="#">Page 1</a></li>
+                <li><a href="#">Page 2</a></li>
+                <li><a href="#">Page 3</a></li>
             </ul>
         </div>
         <div class="col-sm-10">
             <div class="panel panel-default">
                 <!-- Default panel contents -->
-                <div class="panel-heading">Доступные товары</div>
+                <div class="panel-heading">Поставщики:</div>
 
                 <!-- Table -->
                 <table class="table table-hover">
                     <thead>
                     <tr>
-                        <th>Название</th>
-                        <th>Количество</th>
-                        <th>Цена</th>
-                        <th>О продукте</th>
-                        <th>Склады</th>
+                        <th>Имя</th>
+                        <th>Email</th>
+                        <th>Телефон</th>
+                        <th>О поставщике</th>
                         <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="g in vm.goods" class="{{g.quantity > 0 ? '' : 'danger'}}">
-                        <td>{{g.name}}</td>
-                        <td>{{g.quantity}}</td>
-                        <td>{{g.price}}</td>
-                        <td>{{g.about}}</td>
+                    <tr ng-repeat="s in vm.suppliers">
+                        <td>{{s.name}}</td>
+                        <td>{{s.email}}</td>
+                        <td>{{s.phone}}</td>
+                        <td>{{s.about}}</td>
                         <td>
-                            <ul>
-                                <li ng-repeat="address in g.addresses">
-                                    {{address.country}}, {{address.city}}, {{address.street}} {{address.number}}
-                                </li>
-                            </ul>
-                        </td>
-                        <td>
-                            <button ng-click="vm.showEditForm(g)" ctype="button" class="btn btn-default btn-sm"
+                            <button ng-click="vm.showEditForm(s)" ctype="button" class="btn btn-default btn-sm"
                                     data-toggle="modal" data-target="#myModal">
                                 <span class="glyphicon glyphicon-edit"></span> Редактировать
                             </button>
-                            <button ng-click="vm.remove(g.idGoods)" type="button" class="btn btn-default btn-sm">
+                            <button ng-click="vm.remove(s.idSupplier)" type="button" class="btn btn-default btn-sm">
                                 <span class="glyphicon glyphicon-remove"></span> Удалить
-                            </button>
-                            <button ng-if="g.quantity == 0" type="button" class="btn btn-default btn-sm">
-                                <span class="glyphicon glyphicon-download"></span> Заказать товар
                             </button>
                         </td>
                     </tr>
@@ -74,31 +63,31 @@
                 <form name="form" ng-submit="vm.formAction()" role="form"
                       style="padding-left: 10px; padding-right: 10px">
                     <div class="form-group" ng-class="{ 'has-error': form.name.$dirty && form.name.$error.required }">
-                        <label for="name">Название товара</label>
-                        <input type="text" name="name" id="name" class="form-control" ng-model="vm.newGoods.name"
+                        <label for="name">Название</label>
+                        <input type="text" name="name" id="name" class="form-control" ng-model="vm.newSupplier.name"
                                required/>
-                        <span ng-show="form.name.$dirty && form.name.$error.required" class="help-block">Название товара - обязательное поле</span>
+                        <span ng-show="form.name.$dirty && form.name.$error.required" class="help-block">Название - обязательное поле</span>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': form.price.$dirty && form.price.$error.required }">
-                        <label for="name">Цена</label>
-                        <input type="text" name="price" id="price" class="form-control" ng-model="vm.newGoods.price"
+                    <div class="form-group" ng-class="{ 'has-error': form.email.$dirty && form.email.$error.required }">
+                        <label for="email">Email</label>
+                        <input type="text" name="email" id="email" class="form-control" ng-model="vm.newSupplier.email"
                                required/>
-                        <span ng-show="form.price.$dirty && form.price.$error.required"
-                              class="help-block">Цена - обязательное поле</span>
+                        <span ng-show="form.email.$dirty && form.email.$error.required"
+                              class="help-block">Email - обязательное поле</span>
                     </div>
-                    <!--<div ng-if="vm.editionForm" class="form-group"
-                         ng-class="{ 'has-error': form.quantity.$dirty && form.quantity.$error.required }">
-                        <label for="name">Количество</label>
-                        <input type="text" name="quantity" id="quantity" class="form-control"
-                               ng-model="vm.newGoods.quantity" required/>
-                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>
-                    </div>-->
+                    <div class="form-group"
+                         ng-class="{ 'has-error': form.phone.$dirty && form.phone.$error.required }">
+                        <label for="phone">Телефона</label>
+                        <input type="text" name="phone" id="phone" class="form-control"
+                               ng-model="vm.newSupplier.phone" required/>
+                        <span ng-show="form.phone.$dirty && form.phone.$error.required" class="help-block">Телефон - обязательное поле</span>
+                    </div>
                     <div class="form-group" ng-class="{ 'has-error': form.about.$dirty && form.about.$error.required }">
-                        <label for="name">Коротко о товаре:</label>
-                        <input type="text" name="about" id="about" class="form-control" ng-model="vm.newGoods.about"
+                        <label for="about">О поставщике</label>
+                        <input type="text" name="about" id="about" class="form-control" ng-model="vm.newSupplier.about"
                                required/>
                         <span ng-show="form.about.$dirty && form.about.$error.required"
-                              class="help-block">О вас - обязательное поле</span>
+                              class="help-block">О поставщике - обязательное поле</span>
                     </div>
                     <div class="modal-footer">
                         <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">

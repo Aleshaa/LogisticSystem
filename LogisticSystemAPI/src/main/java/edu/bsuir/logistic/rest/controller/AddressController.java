@@ -47,6 +47,24 @@ public class AddressController {
         return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Stores(Addresses for Admin)-------------------------------------------
+
+    @RequestMapping(value = "/rest/get/stores", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Address>> listAllStores() {
+        List<Address> stores = new ArrayList<>();
+        List<Address> addresses = addressService.findAll();
+        if (addresses.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Address address : addresses) {
+            if (address.getUser().getRole().getIdRole() == 1) {
+                stores.add(address);
+            }
+        }
+        return new ResponseEntity<>(stores, HttpStatus.OK);
+    }
+
     //-------------------Retrieve Address without Current Goods--------------------------------------------------------
 
     @RequestMapping(value = "/rest/get/addresses/goods/{id}", method = RequestMethod.GET, produces = MediaType

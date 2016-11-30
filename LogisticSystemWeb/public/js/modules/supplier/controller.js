@@ -2,14 +2,12 @@
 
 module.exports = [
     '$scope',
-    'goodsService',
-    'addressService',
-    function ($scope, goodsService, addressService) {
+    'supplierService',
+    function ($scope, supplierService) {
         var vm = this;
 
-        vm.goods = [];
-        vm.newGoods = {};
-        /*vm.addresses = [];*/
+        vm.suppliers = [];
+        vm.newSupplier = {};
         vm.creationForm = false;
         vm.editionForm = false;
         vm.dataLoading = true;
@@ -31,30 +29,30 @@ module.exports = [
         }
 
         function initController() {
-            loadAllGoods();
+            loadAllSuppliers();
             vm.dataLoading = false;
-            vm.newGoods = {};
+            vm.newSupplier = {};
         }
 
         function showCreationForm() {
-            vm.newGoods = {};
+            vm.newSupplier = {};
             vm.creationForm = true;
             vm.editionForm = false;
         }
 
-        function showEditForm(goods) {
-            vm.newGoods = goods;
+        function showEditForm(supplier) {
+            vm.newSupplier = supplier;
             vm.editionForm = true;
             vm.creationForm = false;
         }
 
 
-        function remove(idGoods) {
+        function remove(idSupplier) {
             vm.dataLoading = true;
-            goodsService.Delete(idGoods)
+            supplierService.Delete(idSupplier)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllSuppliers();
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
@@ -63,13 +61,12 @@ module.exports = [
         }
 
         function create() {
-            vm.newGoods.quantity = 0;
-            goodsService.create(vm.newGoods)
+            supplierService.create(vm.newSupplier)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllSuppliers();
                         vm.creationForm = false;
-                        vm.newGoods = {};
+                        vm.newSupplier = {};
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
@@ -78,13 +75,12 @@ module.exports = [
         }
 
         function edit() {
-            vm.newGoods.quantity = 0;
-            goodsService.update(vm.newGoods)
+            supplierService.update(vm.newSupplier)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllSuppliers();
                         vm.editionForm = false;
-                        vm.newGoods = {};
+                        vm.newSupplier = {};
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
@@ -92,29 +88,11 @@ module.exports = [
                 });
         }
 
-        function loadAllGoods() {
-            goodsService.getAll()
-                .then(function (goods) {
-                    vm.goods = goods.data;
-                    for (var i = 0; i < vm.goods.length; i++) {
-                        loadAddresses(i);
-                    }
+        function loadAllSuppliers() {
+            supplierService.getAll()
+                .then(function (suppliers) {
+                    vm.suppliers = suppliers.data;
                 });
         }
-
-        function loadAddresses(i) {
-            addressService.getStoresForCurrentGoods(vm.goods[i].idGoods)
-                .then(function (addresses) {
-                    vm.goods[i].addresses = [];
-                    vm.goods[i].addresses = addresses.data;
-                });
-        }
-
-        /*function loadAllAddresses() {
-         addressService.getAll()
-         .then(function (addresses) {
-         vm.addresses = addresses.data;
-         })
-         }*/
     }
 ];

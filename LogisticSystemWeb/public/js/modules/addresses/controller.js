@@ -2,17 +2,17 @@
 
 module.exports = [
     '$scope',
-    'goodsService',
     'addressService',
-    function ($scope, goodsService, addressService) {
+    'userService',
+    function ($scope, addressService, userService) {
         var vm = this;
 
-        vm.goods = [];
-        vm.newGoods = {};
-        /*vm.addresses = [];*/
+        vm.stores = [];
+        vm.newStore = {};
         vm.creationForm = false;
         vm.editionForm = false;
         vm.dataLoading = true;
+        vm.currentUser = {};
         vm.showEditForm = showEditForm;
         vm.showCreationForm = showCreationForm;
         vm.remove = remove;
@@ -31,30 +31,31 @@ module.exports = [
         }
 
         function initController() {
-            loadAllGoods();
+            loadAllStores();
+            getCurrentUser();
             vm.dataLoading = false;
-            vm.newGoods = {};
+            vm.newStore = {};
         }
 
         function showCreationForm() {
-            vm.newGoods = {};
+            vm.newStore = {};
             vm.creationForm = true;
             vm.editionForm = false;
         }
 
-        function showEditForm(goods) {
-            vm.newGoods = goods;
+        function showEditForm(store) {
+            vm.newStore = store;
             vm.editionForm = true;
             vm.creationForm = false;
         }
 
 
-        function remove(idGoods) {
+        function remove(idStore) {
             vm.dataLoading = true;
-            goodsService.Delete(idGoods)
+            addressService.Delete(idStore)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllStores();
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
@@ -63,13 +64,12 @@ module.exports = [
         }
 
         function create() {
-            vm.newGoods.quantity = 0;
-            goodsService.create(vm.newGoods)
+            addressService.create(vm.newStore, vm.currentUser.idUser)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllStores();
                         vm.creationForm = false;
-                        vm.newGoods = {};
+                        vm.newStore = {};
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
@@ -78,13 +78,12 @@ module.exports = [
         }
 
         function edit() {
-            vm.newGoods.quantity = 0;
-            goodsService.update(vm.newGoods)
+            addressService.update(vm.newStore)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllStores();
                         vm.editionForm = false;
-                        vm.newGoods = {};
+                        vm.newStore = {};
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
@@ -92,29 +91,18 @@ module.exports = [
                 });
         }
 
-        function loadAllGoods() {
-            goodsService.getAll()
-                .then(function (goods) {
-                    vm.goods = goods.data;
-                    for (var i = 0; i < vm.goods.length; i++) {
-                        loadAddresses(i);
-                    }
+        function loadAllStores() {
+            addressService.getAllStores()
+                .then(function (stores) {
+                    vm.stores = stores.data;
                 });
         }
 
-        function loadAddresses(i) {
-            addressService.getStoresForCurrentGoods(vm.goods[i].idGoods)
-                .then(function (addresses) {
-                    vm.goods[i].addresses = [];
-                    vm.goods[i].addresses = addresses.data;
+        function getCurrentUser() {
+            userService.getCurrentUser()
+                .then(function (user) {
+                    vm.currentUser = user.data;
                 });
         }
-
-        /*function loadAllAddresses() {
-         addressService.getAll()
-         .then(function (addresses) {
-         vm.addresses = addresses.data;
-         })
-         }*/
     }
 ];

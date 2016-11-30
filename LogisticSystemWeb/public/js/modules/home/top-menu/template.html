@@ -18,7 +18,8 @@
             <ul class="nav navbar-nav navbar-right margin-right-5">
                 <li><a ng-if="isAdmin()" href="#/users">Пользователи</a></li>
                 <li><a href="#/goods">Товары</a></li>
-                <li><a ui-sref="#">Page3</a></li>
+                <li><a ng-if="isAdmin()" href="#/addresses">Склады</a></li>
+                <li><a ng-if="isAdmin()" href="#/suppliers">Поставщики</a></li>
                 <li ng-click="logout()"><a ng-if="isAdmin()" href="#/logout" class="cursor-pointer">Выйти</a></li>
                 <li ng-click="logout()"><a ng-if="isUser()" href="#/logout" class="cursor-pointer">{{user.name}} |
                     Выйти</a></li>
