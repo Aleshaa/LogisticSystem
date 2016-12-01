@@ -12,10 +12,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Alesha on 07.11.2016.
@@ -58,6 +62,29 @@ public class BuyController {
         return new ResponseEntity<>(buys, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Completed Buys For Current Client-------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/completed/user", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> getCompletedBuysForCurrentClient() {
+        List<Buy> listBuys = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        Set<Buy> buySet = user.getBuySet();
+        if (buySet.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Buy buy : buySet) {
+            if (buy.isCompleted())
+                listBuys.add(buy);
+        }
+        if (listBuys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listBuys, HttpStatus.OK);
+    }
+
     //-------------------Retrieve All Disabled Buys--------------------------------------------------------
 
     @RequestMapping(value = "/rest/get/buys/nocompleted", method = RequestMethod.GET, produces = MediaType
@@ -68,6 +95,29 @@ public class BuyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(buys, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All No Completed Buys For Current Client-------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/nocompleted/user", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> getNoCompletedBuysForCurrentClient() {
+        List<Buy> listBuys = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        Set<Buy> buySet = user.getBuySet();
+        if (buySet.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Buy buy : buySet) {
+            if (!buy.isCompleted())
+                listBuys.add(buy);
+        }
+        if (listBuys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listBuys, HttpStatus.OK);
     }
 
     //-------------------Retrieve Single Buy--------------------------------------------------------
