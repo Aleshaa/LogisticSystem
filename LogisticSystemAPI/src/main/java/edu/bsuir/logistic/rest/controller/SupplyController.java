@@ -77,7 +77,7 @@ public class SupplyController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         goods.setQuantity(goods.getQuantity() + supply.getQuantity());
-        goodsService.saveGoods(goods);
+        goodsService.updateGoods(goods);
         supply.setGoods(goods);
         supply.setSupplier(supplier);
         supplyService.saveSupply(supply);

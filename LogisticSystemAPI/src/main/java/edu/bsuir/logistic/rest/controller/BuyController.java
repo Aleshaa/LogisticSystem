@@ -2,9 +2,11 @@ package edu.bsuir.logistic.rest.controller;
 
 import edu.bsuir.logistic.rest.model.Buy;
 import edu.bsuir.logistic.rest.model.Goods;
+import edu.bsuir.logistic.rest.model.Purchase;
 import edu.bsuir.logistic.rest.model.User;
 import edu.bsuir.logistic.rest.service.BuyService;
 import edu.bsuir.logistic.rest.service.GoodsService;
+import edu.bsuir.logistic.rest.service.PurchaseService;
 import edu.bsuir.logistic.rest.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class BuyController {
 
     @Autowired
     GoodsService goodsService;
+
+    @Autowired
+    PurchaseService purchaseService;
 
     //-------------------Retrieve All Buys--------------------------------------------------------
 
@@ -205,6 +210,16 @@ public class BuyController {
             currentBuy.setCompleted(true);
             buyService.updateBuy(currentBuy);
 
+            if (buyedGoods.getQuantity() - currentBuy.getQuantity() == 0) {
+                List<Purchase> purchaseList = purchaseService.getAllConfirmed();
+                for (Purchase purchase : purchaseList) {
+                    if (purchase.getClient().getIdUser().equals(currentBuy.getClient().getIdUser()) &&
+                    purchase.getGoods().getIdGoods().equals(currentBuy.getGoods().getIdGoods())) {
+                        purchase.setConfirmed(false);
+                        purchaseService.updatePurchase(purchase);
+                    }
+                }
+            }
             return new ResponseEntity<>(HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

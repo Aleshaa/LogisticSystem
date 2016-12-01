@@ -50,6 +50,27 @@ public class PurchaseController {
         return new ResponseEntity<>(purchases, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Purchases For Current User--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/purchases/user", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Purchase>> listAllPurchasesForCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(1)) {
+            List<Purchase> allPurchase = purchaseService.findAll();
+            if(allPurchase.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(purchaseService.findAll(), HttpStatus.OK);
+        }
+        List<Purchase> listPurchases = new ArrayList<>(user.getPurchases());
+        if (listPurchases.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listPurchases, HttpStatus.OK);
+    }
+
     //-------------------Retrieve All Confirmed Purchases--------------------------------------------------------
 
     @RequestMapping(value = "/rest/get/purchases/confirm", method = RequestMethod.GET, produces = MediaType
@@ -71,6 +92,8 @@ public class PurchaseController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String name = auth.getName();
         User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(1))
+            return new ResponseEntity<>(purchaseService.getAllConfirmed(), HttpStatus.OK);
         Set<Purchase> purchaseSet = user.getPurchases();
         if (purchaseSet.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -95,6 +118,18 @@ public class PurchaseController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(purchases, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve Count Of Non Confirm Purchases--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/purchases/noconfirm/size", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<Integer> sizeOfUnconfirmedPurchases() {
+        List<Purchase> purchases = purchaseService.getAllUnconfirmed();
+        if (purchases.isEmpty()) {
+            return new ResponseEntity<>(0, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(purchases.size(), HttpStatus.OK);
     }
 
     //-------------------Retrieve All No Confirmed Purchases For Current
