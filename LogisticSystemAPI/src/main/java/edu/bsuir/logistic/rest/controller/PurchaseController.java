@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static edu.bsuir.logistic.rest.model.RolesEnum.ADMIN;
+
 /**
  * Created by Alesha on 07.11.2016.
  */
@@ -58,7 +60,7 @@ public class PurchaseController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String name = auth.getName();
         User user = userService.findByUsername(name);
-        if (user.getRole().getIdRole().equals(1)) {
+        if (user.getRole().getIdRole().equals(ADMIN.getValue())) {
             List<Purchase> allPurchase = purchaseService.findAll();
             if(allPurchase.isEmpty())
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -92,7 +94,7 @@ public class PurchaseController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String name = auth.getName();
         User user = userService.findByUsername(name);
-        if (user.getRole().getIdRole().equals(1))
+        if (user.getRole().getIdRole().equals(ADMIN.getValue()))
             return new ResponseEntity<>(purchaseService.getAllConfirmed(), HttpStatus.OK);
         Set<Purchase> purchaseSet = user.getPurchases();
         if (purchaseSet.isEmpty()) {
@@ -120,20 +122,7 @@ public class PurchaseController {
         return new ResponseEntity<>(purchases, HttpStatus.OK);
     }
 
-    //-------------------Retrieve Count Of Non Confirm Purchases--------------------------------------------------------
-
-    @RequestMapping(value = "/rest/get/purchases/noconfirm/size", method = RequestMethod.GET, produces = MediaType
-            .APPLICATION_JSON_VALUE)
-    public ResponseEntity<Integer> sizeOfUnconfirmedPurchases() {
-        List<Purchase> purchases = purchaseService.getAllUnconfirmed();
-        if (purchases.isEmpty()) {
-            return new ResponseEntity<>(0, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(purchases.size(), HttpStatus.OK);
-    }
-
-    //-------------------Retrieve All No Confirmed Purchases For Current
-    // Client-------------------------------------------
+    //-------------------Retrieve All No Confirmed Purchases For Current Client----------------------------------------
 
     @RequestMapping(value = "/rest/get/purchases/noconfirm/user", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
@@ -142,6 +131,8 @@ public class PurchaseController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String name = auth.getName();
         User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(ADMIN.getValue()))
+            return new ResponseEntity<>(purchaseService.getAllUnconfirmed(), HttpStatus.OK);
         Set<Purchase> purchaseSet = user.getPurchases();
         if (purchaseSet.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -156,6 +147,30 @@ public class PurchaseController {
         return new ResponseEntity<>(listPurchases, HttpStatus.OK);
     }
 
+    //-------------------Retrieve Count Of Non Confirm Purchases--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/purchases/noconfirm/size", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<Integer> sizeOfUnconfirmedPurchases() {
+        List<Purchase> listPurchases = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(ADMIN.getValue()))
+            return new ResponseEntity<>(purchaseService.getAllUnconfirmed().size(), HttpStatus.OK);
+        Set<Purchase> purchaseSet = user.getPurchases();
+        if (purchaseSet.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Purchase purchase : purchaseSet) {
+            if (!purchase.isConfirmed())
+                listPurchases.add(purchase);
+        }
+        if (listPurchases.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listPurchases.size(), HttpStatus.OK);
+    }
 
     //-------------------Retrieve Single Purchase--------------------------------------------------------
 
