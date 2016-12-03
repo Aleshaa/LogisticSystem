@@ -15,6 +15,7 @@ module.exports = [
         service.getAll = getAll;
         service.getCountOfNonConfirm = getCountOfNonConfirm;
         service.create = create;
+        service.confirm = confirm;
         service.update = update;
         service.remove = remove;
 
@@ -30,19 +31,24 @@ module.exports = [
                 handleError('Ошибка при получении количества неподтвержденных заявок'));
         }
 
-        function create(newAddress, idUser) {
-            return $http.post(REST_SERVICE_URI + 'address/' + idUser, newAddress).then(handleSuccess,
-                handleError('Ошибка при добавлении нового адреса'));
+        function create(idClient, idGoods, purchase) {
+            return $http.post(REST_SERVICE_URI + 'rest/create/purchase/' + idClient + '/' + idGoods, purchase)
+                .then(handleSuccess, handleError('Ошибка при создание новой заявки на поставку клиенту'));
         }
 
-        function update(curAddress) {
-            return $http.put(REST_SERVICE_URI + 'rest/update/address/' + curAddress.idAddress, curAddress)
-                .then(handleSuccess, handleError('Ошибка обновления товара'));
+        function confirm(id) {
+            return $http.post(REST_SERVICE_URI + 'rest/update/purchase/' + id + '/confirm')
+                .then(handleSuccess, handleError('Ошибка при подтверждении поставки'));
+        }
+
+        function update(curPurchase, newGoods) {
+            return $http.put(REST_SERVICE_URI + 'rest/update/purchase/' + curPurchase.idPurchase + '/' + newGoods, curPurchase)
+                .then(handleSuccess, handleError('Ошибка обновления поставки'));
         }
 
         function remove(id) {
-            return $http.delete(REST_SERVICE_URI + 'rest/delete/address/' + id).then(handleSuccess,
-                handleError('Ошибка удаления товара'));
+            return $http.delete(REST_SERVICE_URI + 'rest/delete/purchase/' + id).then(handleSuccess,
+                handleError('Ошибка удаления поставки клиенту'));
         }
 
         function handleSuccess(res) {

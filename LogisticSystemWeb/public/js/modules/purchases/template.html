@@ -2,37 +2,55 @@
     <div class="row">
         <div class="col-sm-2">
             <ul id="sidebar" class="nav nav-stacked affix">
-                <li><a href="#">Page 1</a></li>
-                <li><a href="#">Page 2</a></li>
-                <li><a href="#">Page 3</a></li>
+                <li>
+                    <a href="#/buys">Поставки
+                        <span class="badge">
+                            {{vm.countOfNonComplete}}
+                        </span>
+                    </a>
+                </li>
+                <li><a href="#">Статистика</a></li>
             </ul>
         </div>
         <div class="col-sm-10">
             <div class="panel panel-default">
                 <!-- Default panel contents -->
-                <div class="panel-heading">Склады:</div>
+                <div class="panel-heading">Заказы:</div>
 
                 <!-- Table -->
                 <table class="table table-hover">
                     <thead>
                     <tr>
-                        <th>Страна</th>
-                        <th>Город</th>
-                        <th>Адрес</th>
+                        <th>Товар</th>
+                        <th>Клиент</th>
+                        <th>Периодичность (раз в n дней)</th>
+                        <th>Размер поставки(шт.)</th>
+                        <th>Статус</th>
                         <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="s in vm.stores">
-                        <td>{{s.country}}</td>
-                        <td>{{s.city}}</td>
-                        <td>{{s.street}}, {{s.number}}</td>
+                    <tr ng-repeat="p in vm.purchases"
+                        class="{{p.confirmed == false && p.goods.quantity === 0 ? 'danger' : (
+                        (p.confirmed == false && p.goods.quantity != 0) ||
+                        (p.confirmed == true && p.goods.quantity === 0) ? 'warning' : 'success'
+                        )}}">
+                        <td>{{p.goods.name}}</td>
+                        <td>{{p.client.name}}</td>
+                        <td>{{p.frequency}}</td>
+                        <td>{{p.quantity}}</td>
+                        <td>{{p.confirmed ? "Подтверждено" : "Не подтверждено"}}</td>
                         <td>
-                            <button ng-click="vm.showEditForm(s)" ctype="button" class="btn btn-default btn-sm"
-                                    data-toggle="modal" data-target="#myModal">
-                                <span class="glyphicon glyphicon-edit"></span> Редактировать
+                            <button ng-if="p.confirmed == false && p.goods.quantity != 0"
+                                    ng-click="vm.confirm(p.idPurchase)" type="button" class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-ok"></span> Подтвердить
                             </button>
-                            <button ng-click="vm.remove(s.idAddress)" type="button" class="btn btn-default btn-sm">
+                            <button ng-if="p.goods.quantity === 0" ng-click="vm.showOrderForm(p.goods)" ctype="button"
+                                    class="btn btn-default btn-sm"
+                                    data-toggle="modal" data-target="#orderSupply">
+                                <span class="glyphicon glyphicon-download"></span> Заказать товар на склад
+                            </button>
+                            <button ng-click="vm.remove(p.idPurchase)" type="button" class="btn btn-default btn-sm">
                                 <span class="glyphicon glyphicon-remove"></span> Удалить
                             </button>
                         </td>
@@ -40,56 +58,49 @@
                     </tbody>
                 </table>
             </div>
-            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"
-                    data-target="#myModal">
-                Добавить
-            </button>
             <img ng-if="vm.dataLoading"
                  src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>
 
         </div>
     </div>
-    <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal fade" id="orderSupply" role="dialog">
         <div class="modal-dialog">
 
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>
+                    <h4 class="modal-title">Заказать</h4>
                 </div>
                 <form name="form" ng-submit="vm.formAction()" role="form"
                       style="padding-left: 10px; padding-right: 10px">
                     <div class="form-group"
-                         ng-class="{ 'has-error': form.country.$dirty && form.country.$error.required }">
-                        <label for="country">Страна</label>
-                        <input type="text" name="country" id="country" class="form-control"
-                               ng-model="vm.newStore.country"
-                               required/>
-                        <span ng-show="form.country.$dirty && form.country.$error.required" class="help-block">Страна - обязательное поле</span>
-                    </div>
-                    <div class="form-group" ng-class="{ 'has-error': form.city.$dirty && form.city.$error.required }">
-                        <label for="country">Город</label>
-                        <input type="text" name="city" id="city" class="form-control" ng-model="vm.newStore.city"
-                               required/>
-                        <span ng-show="form.city.$dirty && form.city.$error.required"
-                              class="help-block">Город - обязательное поле</span>
+                         ng-class="{ 'has-error': form.supplier.$dirty && form.supplier.$error.required }">
+                        <label for="supplier">Поставщик</label>
+                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"
+                                required>
+                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>
+                        </select>
+                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"
+                              class="help-block">Поставщик - обязательное поле</span>
                     </div>
                     <div class="form-group"
-                         ng-class="{ 'has-error': form.street.$dirty && form.street.$error.required }">
-                        <label for="country">Улица</label>
-                        <input type="text" name="street" id="street" class="form-control"
-                               ng-model="vm.newStore.street" required/>
-                        <span ng-show="form.street.$dirty && form.street.$error.required" class="help-block">Улицы - обязательное поле</span>
+                         ng-class="{ 'has-error': form.supplier.$dirty && form.supplier.$error.required }">
+                        <label for="supplier">Склад</label>
+                        <br/>
+                        <label ng-repeat="a in vm.addresses" class="radio-inline">
+                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">
+                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}
+                        </label>
+                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"
+                              class="help-block">Поставщик - обязательное поле</span>
                     </div>
                     <div class="form-group"
-                         ng-class="{ 'has-error': form.number.$dirty && form.number.$error.required }">
-                        <label for="country">Номер</label>
-                        <input type="number" name="number" id="number" class="form-control"
-                               ng-model="vm.newStore.number"
-                               required/>
-                        <span ng-show="form.number.$dirty && form.number.$error.required"
-                              class="help-block">Номер - обязательное поле</span>
+                         ng-class="{ 'has-error': form.quantity.$dirty && form.quantity.$error.required }">
+                        <label for="quantity">Количество</label>
+                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"
+                               ng-model="vm.newSupply.quantity" required/>
+                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>
                     </div>
                     <div class="modal-footer">
                         <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">

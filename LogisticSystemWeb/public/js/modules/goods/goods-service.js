@@ -14,6 +14,7 @@ module.exports = [
 
         service.getAll = getAll;
         service.create = create;
+        service.putGoodsToStore = putGoodsToStore;
         service.update = update;
         service.Delete = Delete;
 
@@ -27,6 +28,11 @@ module.exports = [
         function create(newGoods) {
             return $http.post(REST_SERVICE_URI + 'rest/create/goods', newGoods).then(handleSuccess,
                 handleError('Ошибка при добавлении нового товара'));
+        }
+
+        function putGoodsToStore(idGoods, idStore) {
+            return $http.post(REST_SERVICE_URI + 'rest/add/goods/' + idGoods + '/address/' + idStore)
+                .then(handleSuccess, handleError('Ошибка при добавлении поставке товара на склад'));
         }
 
         function update(curGoods) {

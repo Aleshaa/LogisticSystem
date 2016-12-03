@@ -28,7 +28,6 @@ module.exports = [
                         console.log(count.message);
                     }
                 });
-            /*$scope.user = authService.getAuthUser();*/
         }
 
         $scope.isAuth = function () {

@@ -24,8 +24,8 @@ module.exports = [
                 handleError('Ошибка при получении всех поставок'));
         }
 
-        function create(newSupply, idSupplier, idGoods) {
-            return $http.post(REST_SERVICE_URI + 'rest/create/supply/' + idSupplier + '/' + idGoods,
+        function create(newSupply, idSupplier, idGoods, idAddress) {
+            return $http.post(REST_SERVICE_URI + 'rest/create/supply/' + idSupplier + '/' + idGoods + '/' + idAddress,
                 newSupply).then(handleSuccess, handleError('Ошибка при добавлении новой поставки'));
         }
 

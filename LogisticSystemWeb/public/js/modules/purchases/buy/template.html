@@ -1,0 +1,59 @@
+<div class="container" style="margin-top:70px">
+    <div class="row">
+        <div class="col-sm-2">
+            <ul id="sidebar" class="nav nav-stacked affix">
+                <li><a href="#">Статистика</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-10">
+            <ul class="breadcrumb">
+                <li><a href="#/purchases">Заказы на поставку</a></li>
+                <li class="active">Поставки клиенту</li>
+            </ul>
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">Поставки клиенту</div>
+
+                <!-- Table -->
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Клиент</th>
+                        <th>Количество</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="b in vm.buys"
+                        class="{{b.completed == false && b.goods.quantity === 0 ? 'danger' : (
+                        (b.completed == false && b.goods.quantity != 0) ||
+                        (b.completed == true && b.goods.quantity === 0) ? 'warning' : 'success'
+                        )}}">
+                        <td>{{b.goods.name}}</td>
+                        <td>{{b.client.name}}</td>
+                        <td>{{b.quantity}}</td>
+                        <td>{{b.date}}</td>
+                        <td>{{b.completed ? "Подтверждено" : "Не подтверждено"}}</td>
+                        <td>
+                            <button ng-if="b.completed == false && b.goods.quantity != 0 && !vm.isAdmin()"
+                                    ng-click="vm.confirm(b.idBuy)" type="button" class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-ok"></span> Подтвердить
+                            </button>
+                            <button ng-if="!b.completed && !vm.isAdmin()" ng-click="vm.remove(b.idBuy)" type="button"
+                                    class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-remove"></span> Удалить
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <img ng-if="vm.dataLoading"
+                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>
+
+        </div>
+    </div>
+</div>

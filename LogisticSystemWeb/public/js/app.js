@@ -34,9 +34,9 @@ domready(function () {
             'Registration',
             'Home',
             'User',
-                'Goods',
-                'Addresses',
-                'Purchases'
+            'Goods',
+            'Addresses',
+            'Purchases'
         ]);
     angular.bootstrap(document, ['App']);
 });

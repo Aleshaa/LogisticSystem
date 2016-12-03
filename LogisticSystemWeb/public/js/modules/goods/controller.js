@@ -11,10 +11,10 @@ module.exports = [
         var vm = this;
 
         vm.goods = [];
+        vm.suppliers = [];
+        vm.addresses = [];
         vm.newGoods = {};
         vm.currentGoods = {};
-        /*vm.addresses = [];*/
-        vm.suppliers = [];
         vm.newSupply = {};
         vm.creationForm = false;
         vm.editionForm = false;
@@ -45,6 +45,7 @@ module.exports = [
         function initController() {
             loadAllGoods();
             loadAllSuppliers();
+            loadAllAddresses();
             vm.dataLoading = false;
             vm.newGoods = {};
         }
@@ -142,12 +143,14 @@ module.exports = [
         function createSupply() {
             var idGoods = vm.currentGoods.idGoods;
             var idSupplier = vm.newSupply.supplier;
+            var idAddress = vm.newSupply.address;
             delete vm.newSupply.supplier;
+            delete vm.newSupply.address;
             var date = new Date();
             vm.newSupply.date = date.getFullYear() + "-" +
                 ((date.getMonth() + 1) < 10 ? ("0" + (date.getMonth() + 1)) : (date.getMonth() + 1)) + "-" +
                 (date.getDate() < 10 ? ("0" + date.getDate()) : date.getDate());
-            supplyService.create(vm.newSupply, idSupplier, idGoods)
+            supplyService.create(vm.newSupply, idSupplier, idGoods, idAddress)
                 .then(function (response) {
                     if (response.success) {
                         loadAllGoods();
@@ -162,11 +165,11 @@ module.exports = [
                 });
         }
 
-        /*function loadAllAddresses() {
-         addressService.getAll()
-         .then(function (addresses) {
-         vm.addresses = addresses.data;
-         })
-         }*/
+        function loadAllAddresses() {
+            addressService.getAllStores()
+                .then(function (addresses) {
+                    vm.addresses = addresses.data;
+                })
+        }
     }
 ];

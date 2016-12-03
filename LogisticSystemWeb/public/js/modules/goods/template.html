@@ -86,18 +86,11 @@
                     </div>
                     <div class="form-group" ng-class="{ 'has-error': form.price.$dirty && form.price.$error.required }">
                         <label for="name">Цена</label>
-                        <input type="text" name="price" id="price" class="form-control" ng-model="vm.newGoods.price"
+                        <input type="number" name="price" id="price" class="form-control" ng-model="vm.newGoods.price"
                                required/>
                         <span ng-show="form.price.$dirty && form.price.$error.required"
                               class="help-block">Цена - обязательное поле</span>
                     </div>
-                    <!--<div ng-if="vm.editionForm" class="form-group"
-                         ng-class="{ 'has-error': form.quantity.$dirty && form.quantity.$error.required }">
-                        <label for="name">Количество</label>
-                        <input type="text" name="quantity" id="quantity" class="form-control"
-                               ng-model="vm.newGoods.quantity" required/>
-                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>
-                    </div>-->
                     <div class="form-group" ng-class="{ 'has-error': form.about.$dirty && form.about.$error.required }">
                         <label for="name">Коротко о товаре:</label>
                         <input type="text" name="about" id="about" class="form-control" ng-model="vm.newGoods.about"
@@ -134,6 +127,17 @@
                                 required>
                             <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>
                         </select>
+                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"
+                              class="help-block">Поставщик - обязательное поле</span>
+                    </div>
+                    <div class="form-group"
+                         ng-class="{ 'has-error': form.supplier.$dirty && form.supplier.$error.required }">
+                        <label for="supplier">Склад</label>
+                        <br/>
+                        <label ng-repeat="a in vm.addresses" class="radio-inline">
+                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">
+                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}
+                        </label>
                         <span ng-show="form.supplier.$dirty && form.supplier.$error.required"
                               class="help-block">Поставщик - обязательное поле</span>
                     </div>

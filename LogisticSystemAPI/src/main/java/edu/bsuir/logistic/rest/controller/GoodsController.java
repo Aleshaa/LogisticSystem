@@ -51,6 +51,10 @@ public class GoodsController {
     public ResponseEntity<List<Goods>> listAllAddressForCurrentGoods(@PathVariable("id") int id) {
         Address address = addressService.findById(id);
 
+        if (address == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         List<Goods> goods = new ArrayList<>();
         goods.addAll(address.getGoodsSet());
         if (goods.isEmpty()) {
