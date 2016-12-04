@@ -3,8 +3,7 @@
 module.exports = [
     '$scope',
     'userService',
-    '$rootScope',
-    function ($scope, UserService, $rootScope) {
+    function ($scope, UserService) {
         var vm = this;
 
         vm.user = null;

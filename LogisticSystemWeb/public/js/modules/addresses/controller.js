@@ -92,7 +92,7 @@ module.exports = [
         }
 
         function loadAllStores() {
-            addressService.getAllStores()
+            addressService.getAllAddresses()
                 .then(function (stores) {
                     vm.stores = stores.data;
                 });

@@ -2,9 +2,11 @@ package edu.bsuir.logistic.rest.controller;
 
 import edu.bsuir.logistic.rest.model.Buy;
 import edu.bsuir.logistic.rest.model.Goods;
+import edu.bsuir.logistic.rest.model.Purchase;
 import edu.bsuir.logistic.rest.model.User;
 import edu.bsuir.logistic.rest.service.BuyService;
 import edu.bsuir.logistic.rest.service.GoodsService;
+import edu.bsuir.logistic.rest.service.PurchaseService;
 import edu.bsuir.logistic.rest.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static edu.bsuir.logistic.rest.model.RolesEnum.ADMIN;
 
 /**
  * Created by Alesha on 07.11.2016.
@@ -34,6 +42,9 @@ public class BuyController {
     @Autowired
     GoodsService goodsService;
 
+    @Autowired
+    PurchaseService purchaseService;
+
     //-------------------Retrieve All Buys--------------------------------------------------------
 
     @RequestMapping(value = "/rest/get/buys", method = RequestMethod.GET, produces = MediaType
@@ -44,6 +55,27 @@ public class BuyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(buys, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All Buys For Current User--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/user", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> listAllBuysForCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(ADMIN.getValue())) {
+            List<Buy> allBuys = buyService.findAll();
+            if (allBuys.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(allBuys, HttpStatus.OK);
+        }
+        List<Buy> listBuys = new ArrayList<>(user.getBuySet());
+        if (listBuys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listBuys, HttpStatus.OK);
     }
 
     //-------------------Retrieve All Completed Buys--------------------------------------------------------
@@ -58,6 +90,35 @@ public class BuyController {
         return new ResponseEntity<>(buys, HttpStatus.OK);
     }
 
+    //-------------------Retrieve All Completed Buys For Current Client-------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/completed/user", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> getCompletedBuysForCurrentClient() {
+        List<Buy> listBuys = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(ADMIN.getValue())) {
+            List<Buy> allCompletedBuys = buyService.getCompleted();
+            if (allCompletedBuys.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(allCompletedBuys, HttpStatus.OK);
+        }
+        Set<Buy> buySet = user.getBuySet();
+        if (buySet.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Buy buy : buySet) {
+            if (buy.isCompleted())
+                listBuys.add(buy);
+        }
+        if (listBuys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listBuys, HttpStatus.OK);
+    }
+
     //-------------------Retrieve All Disabled Buys--------------------------------------------------------
 
     @RequestMapping(value = "/rest/get/buys/nocompleted", method = RequestMethod.GET, produces = MediaType
@@ -68,6 +129,65 @@ public class BuyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(buys, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All No Completed Buys For Current Client-------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/nocompleted/user", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> getNoCompletedBuysForCurrentClient() {
+        List<Buy> listBuys = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(ADMIN.getValue())) {
+            List<Buy> allNonCompletedBuys = buyService.getDisabled();
+            if (allNonCompletedBuys.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(allNonCompletedBuys, HttpStatus.OK);
+        }
+        Set<Buy> buySet = user.getBuySet();
+        if (buySet.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Buy buy : buySet) {
+            if (!buy.isCompleted())
+                listBuys.add(buy);
+        }
+        if (listBuys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listBuys, HttpStatus.OK);
+    }
+
+
+    //-------------------Retrieve Count Of Non Completed Buys--------------------------------------------------------
+
+    @RequestMapping(value = "/rest/get/buys/nocompleted/size", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<Integer> sizeOfUnconfirmedPurchases() {
+        List<Buy> listBuys = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(ADMIN.getValue())) {
+            List<Buy> allNonCompletedBuys = buyService.getDisabled();
+            if (allNonCompletedBuys.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(allNonCompletedBuys.size(), HttpStatus.OK);
+        }
+        Set<Buy> buySet = user.getBuySet();
+        if (buySet.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Buy buy : buySet) {
+            if (!buy.isCompleted())
+                listBuys.add(buy);
+        }
+        if (listBuys.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listBuys.size(), HttpStatus.OK);
     }
 
     //-------------------Retrieve Single Buy--------------------------------------------------------
@@ -155,6 +275,16 @@ public class BuyController {
             currentBuy.setCompleted(true);
             buyService.updateBuy(currentBuy);
 
+            if (buyedGoods.getQuantity() - currentBuy.getQuantity() == 0) {
+                List<Purchase> purchaseList = purchaseService.getAllConfirmed();
+                for (Purchase purchase : purchaseList) {
+                    if (purchase.getClient().getIdUser().equals(currentBuy.getClient().getIdUser()) &&
+                    purchase.getGoods().getIdGoods().equals(currentBuy.getGoods().getIdGoods())) {
+                        purchase.setConfirmed(false);
+                        purchaseService.updatePurchase(purchase);
+                    }
+                }
+            }
             return new ResponseEntity<>(HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

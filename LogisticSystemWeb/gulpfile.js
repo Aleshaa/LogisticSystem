@@ -23,7 +23,8 @@ var cssFiles = [
     './public/bower_components/ng-dialog/css/ngDialog.css',
     './public/bower_components/ng-dialog/css/ngDialog-theme-default.css',
     './public/bower_components/angularjs-slider/dist/rzslider.css',
-    './public/bower_components/bootstrap/dist/css/bootstrap.min.css'
+    './public/bower_components/bootstrap/dist/css/bootstrap.min.css',
+    './public/bower_components/font-awesome/css/font-awesome.min.css'
 ];
 
 gulp.task('concat-js-libs', function () {

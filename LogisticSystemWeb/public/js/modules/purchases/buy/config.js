@@ -4,9 +4,9 @@ module.exports = [
     '$stateProvider',
     function ($stateProvider) {
         $stateProvider
-            .state('addresses', {
-                url: '/addresses',
-                controller: 'AddressController',
+            .state('buys', {
+                url: '/buys',
+                controller: 'BuyController',
                 controllerAs: 'vm',
                 template: require('./template.html'),
                 data: {

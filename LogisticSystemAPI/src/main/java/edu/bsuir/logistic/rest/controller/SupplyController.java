@@ -1,9 +1,7 @@
 package edu.bsuir.logistic.rest.controller;
 
-import edu.bsuir.logistic.rest.model.Goods;
-import edu.bsuir.logistic.rest.model.Supplier;
-import edu.bsuir.logistic.rest.model.Supply;
-import edu.bsuir.logistic.rest.model.User;
+import edu.bsuir.logistic.rest.model.*;
+import edu.bsuir.logistic.rest.service.AddressService;
 import edu.bsuir.logistic.rest.service.GoodsService;
 import edu.bsuir.logistic.rest.service.SupplierService;
 import edu.bsuir.logistic.rest.service.SupplyService;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Alesha on 07.11.2016.
@@ -34,6 +33,9 @@ public class SupplyController {
 
     @Autowired
     GoodsService goodsService;
+
+    @Autowired
+    AddressService addressService;
 
     //-------------------Retrieve All Supplies--------------------------------------------------------
 
@@ -65,19 +67,27 @@ public class SupplyController {
 
     //-------------------Create a Supply--------------------------------------------------------
 
-    @RequestMapping(value = "/rest/create/supply/{idSupplier}/{idGoods}", method = RequestMethod.POST)
+    @RequestMapping(value = "/rest/create/supply/{idSupplier}/{idGoods}/{idAddress}", method = RequestMethod.POST)
     public ResponseEntity<Void> createSupply(@PathVariable("idSupplier") int idSupplier, @PathVariable("idGoods") int
-            idGoods, @RequestBody Supply supply, UriComponentsBuilder ucBuilder) {
+            idGoods, @PathVariable("idAddress") int idAddress, @RequestBody Supply supply, UriComponentsBuilder ucBuilder) {
         System.out.println("Creating Supply " + supply.getIdSupply());
 
         Supplier supplier = supplierService.findById(idSupplier);
         Goods goods = goodsService.findById(idGoods);
+        Address address = addressService.findById(idAddress);
 
-        if (supplier == null || goods == null) {
+        if (supplier == null || goods == null || address == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        if (!goods.getAddressSet().contains(address)) {
+            Set<Address> addressSet = goods.getAddressSet();
+            addressSet.add(address);
+            goods.setAddressSet(addressSet);
+        }
+
         goods.setQuantity(goods.getQuantity() + supply.getQuantity());
-        goodsService.saveGoods(goods);
+        goodsService.updateGoods(goods);
         supply.setGoods(goods);
         supply.setSupplier(supplier);
         supplyService.saveSupply(supply);

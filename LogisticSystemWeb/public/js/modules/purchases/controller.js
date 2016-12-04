@@ -1,33 +1,50 @@
 'use strict';
 
 module.exports = [
-    '$scope',
-    'goodsService',
-    'addressService',
+    'purchaseService',
     'authService',
     'supplierService',
     'supplyService',
-    function ($scope, goodsService, addressService, authService, supplierService, supplyService) {
+    'goodsService',
+    'addressService',
+    'buyService',
+    'userService',
+    function (purchaseService, authService, supplierService, supplyService, goodsService, addressService, buyService, userService) {
         var vm = this;
 
-        vm.goods = [];
         vm.suppliers = [];
         vm.addresses = [];
-        vm.newGoods = {};
-        vm.currentGoods = {};
+        vm.purchases = [];
+        vm.goods = [];
         vm.newSupply = {};
+        vm.newPurchase = {};
+        vm.currentGoods = {};
+        vm.currentUser = {};
+        vm.countOfNonComplete = 0;
         vm.creationForm = false;
         vm.editionForm = false;
         vm.orderForm = false;
         vm.dataLoading = true;
+        vm.formAction = formAction;
+        vm.getCountOfNonComplete = getCountOfNonComplete;
+        vm.isAdmin = isAdmin;
         vm.showEditForm = showEditForm;
         vm.showCreationForm = showCreationForm;
-        vm.remove = remove;
-        vm.formAction = formAction;
-        vm.isAdmin = isAdmin;
         vm.showOrderForm = showOrderForm;
+        vm.confirm = confirm;
+        vm.remove = remove;
 
         initController();
+
+        function initController() {
+            getCountOfNonComplete();
+            getCurrentUser();
+            loadAllGoods();
+            loadAllPurchases();
+            loadAllSuppliers();
+            loadAllAddresses();
+            vm.dataLoading = false;
+        }
 
         function formAction() {
             vm.dataLoading = true;
@@ -42,26 +59,21 @@ module.exports = [
             }
         }
 
-        function initController() {
-            loadAllGoods();
-            loadAllSuppliers();
-            loadAllAddresses();
-            vm.dataLoading = false;
-            vm.newGoods = {};
-        }
-
         function isAdmin() {
             return authService.checkRole(['ADMIN']);
         }
 
         function showCreationForm() {
-            vm.newGoods = {};
+            vm.newPurchase = {};
             vm.creationForm = true;
             vm.editionForm = false;
         }
 
-        function showEditForm(goods) {
-            vm.newGoods = goods;
+        function showEditForm(purchase) {
+            vm.newPurchase.idPurchase = purchase.idPurchase;
+            vm.newPurchase.goods = purchase.goods.idGoods;
+            vm.newPurchase.frequency = purchase.frequency;
+            vm.newPurchase.quantity = purchase.quantity;
             vm.editionForm = true;
             vm.creationForm = false;
         }
@@ -71,13 +83,25 @@ module.exports = [
             vm.orderForm = true;
         }
 
-
-        function remove(idGoods) {
+        function confirm(idPurchase) {
             vm.dataLoading = true;
-            goodsService.Delete(idGoods)
+            purchaseService.confirm(idPurchase)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllPurchases();
+                        vm.dataLoading = false;
+                    } else {
+                        console.log(response.message)
+                    }
+                });
+        }
+
+        function remove(idPurchase) {
+            vm.dataLoading = true;
+            purchaseService.remove(idPurchase)
+                .then(function (response) {
+                    if (response.success) {
+                        loadAllPurchases();
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
@@ -86,50 +110,43 @@ module.exports = [
         }
 
         function create() {
-            vm.newGoods.quantity = 0;
-            goodsService.create(vm.newGoods)
+            var idGoods = vm.newPurchase.goods;
+            delete vm.newPurchase.goods;
+            purchaseService.create(vm.currentUser.idUser, idGoods, vm.newPurchase)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllPurchases();
                         vm.creationForm = false;
-                        vm.newGoods = {};
+                        vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
-                        console.log("Что-то пошло не так")
+                        console.log("Что-то пошло не так");
+                        console.log(response.message);
                     }
                 });
         }
 
         function edit() {
-            vm.newGoods.quantity = 0;
-            goodsService.update(vm.newGoods)
+            var idGoods = vm.newPurchase.goods;
+            delete vm.newPurchase.goods;
+            purchaseService.update(vm.newPurchase, idGoods)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
+                        loadAllPurchases();
                         vm.editionForm = false;
-                        vm.newGoods = {};
+                        vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
-                        console.log("Что-то пошло не так")
+                        console.log("Что-то пошло не так");
+                        console.log(response.message);
                     }
                 });
         }
 
-        function loadAllGoods() {
-            goodsService.getAll()
-                .then(function (goods) {
-                    vm.goods = goods.data;
-                    for (var i = 0; i < vm.goods.length; i++) {
-                        loadAddresses(i);
-                    }
-                });
-        }
-
-        function loadAddresses(i) {
-            addressService.getStoresForCurrentGoods(vm.goods[i].idGoods)
-                .then(function (addresses) {
-                    vm.goods[i].addresses = [];
-                    vm.goods[i].addresses = addresses.data;
+        function loadAllPurchases() {
+            purchaseService.getAll()
+                .then(function (purchases) {
+                    vm.purchases = purchases.data;
                 });
         }
 
@@ -153,8 +170,7 @@ module.exports = [
             supplyService.create(vm.newSupply, idSupplier, idGoods, idAddress)
                 .then(function (response) {
                     if (response.success) {
-                        loadAllGoods();
-                        vm.creationForm = false;
+                        loadAllPurchases();
                         vm.orderForm = false;
                         vm.currentGoods = {};
                         vm.newSupply = {};
@@ -170,6 +186,31 @@ module.exports = [
                 .then(function (addresses) {
                     vm.addresses = addresses.data;
                 })
+        }
+
+        function loadAllGoods() {
+            goodsService.getAll()
+                .then(function (goods) {
+                    vm.goods = goods.data;
+                });
+        }
+
+        function getCountOfNonComplete() {
+            buyService.getCountOfNonComplete()
+                .then(function (count) {
+                    if (count.success) {
+                        vm.countOfNonComplete = count.data;
+                    } else {
+                        console.log(count.message);
+                    }
+                })
+        }
+
+        function getCurrentUser() {
+            userService.getCurrentUser()
+                .then(function (user) {
+                    vm.currentUser = user.data;
+                });
         }
     }
 ];

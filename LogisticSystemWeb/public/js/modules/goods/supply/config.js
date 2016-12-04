@@ -4,13 +4,13 @@ module.exports = [
     '$stateProvider',
     function ($stateProvider) {
         $stateProvider
-            .state('addresses', {
-                url: '/addresses',
-                controller: 'AddressController',
+            .state('supplies', {
+                url: '/supplies',
+                controller: 'SupplyController',
                 controllerAs: 'vm',
                 template: require('./template.html'),
                 data: {
-                    authorizedRoles: ['ADMIN', 'USER']
+                    authorizedRoles: ['ADMIN']
                 }
             });
     }

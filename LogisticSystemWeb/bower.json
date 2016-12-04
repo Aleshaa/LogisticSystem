@@ -17,7 +17,7 @@
     "moment": "2.10.3",
     "moment-timezone": "0.3.1",
     "lodash": "3.8.0",
-    "font-awesome": "~4.4.0",
+    "font-awesome": "~4.7.0",
     "ng-file-upload": "~10.1.9",
     "angular-local-storage": "^0.3.0",
     "angular-websocket": "^2.0.0",

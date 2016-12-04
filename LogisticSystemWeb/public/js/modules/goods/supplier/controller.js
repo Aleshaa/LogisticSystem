@@ -49,7 +49,7 @@ module.exports = [
 
         function remove(idSupplier) {
             vm.dataLoading = true;
-            supplierService.Delete(idSupplier)
+            supplierService.remove(idSupplier)
                 .then(function (response) {
                     if (response.success) {
                         loadAllSuppliers();

@@ -16,7 +16,7 @@ require('./modules/login');
 require('./modules/register');
 require('./modules/goods');
 require('./modules/addresses');
-require('./modules/supplier');
+require('./modules/purchases');
 
 domready(function () {
     angular
@@ -34,9 +34,9 @@ domready(function () {
             'Registration',
             'Home',
             'User',
-                'Goods',
-                'Addresses',
-                'Supplier'
+            'Goods',
+            'Addresses',
+            'Purchases'
         ]);
     angular.bootstrap(document, ['App']);
 });

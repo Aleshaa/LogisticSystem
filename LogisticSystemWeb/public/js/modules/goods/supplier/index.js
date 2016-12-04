@@ -3,7 +3,7 @@
 var angular = require('angular');
 
 angular
-    .module('Supplier', [])
+    .module('Goods.Supplier', [])
     .config(require('./config'))
     .controller('SupplierController', require('./controller'))
     .service('supplierService', require('./supplier-service'));

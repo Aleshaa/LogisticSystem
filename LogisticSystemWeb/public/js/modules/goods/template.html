@@ -2,12 +2,15 @@
     <div class="row">
         <div class="col-sm-2">
             <ul id="sidebar" class="nav nav-stacked affix">
-                <li><a href="#">Page1</a></li>
-                <li><a href="#">Page2</a></li>
-                <li><a href="#">Page3</a></li>
+                <li><a ng-if="vm.isAdmin()" href="#/suppliers">Поставщики</a></li>
+                <li><a ng-if="vm.isAdmin()" href="#/supplies">Поставки</a></li>
+                <li><a href="#">Статистики</a></li>
             </ul>
         </div>
         <div class="col-sm-10">
+            <ul class="breadcrumb">
+                <li class="active">Товары</li>
+            </ul>
             <div class="panel panel-default">
                 <!-- Default panel contents -->
                 <div class="panel-heading">Доступные товары</div>
@@ -45,7 +48,9 @@
                             <button ng-click="vm.remove(g.idGoods)" type="button" class="btn btn-default btn-sm">
                                 <span class="glyphicon glyphicon-remove"></span> Удалить
                             </button>
-                            <button ng-if="g.quantity == 0" type="button" class="btn btn-default btn-sm">
+                            <button ng-if="g.quantity == 0" ng-click="vm.showOrderForm(g)" ctype="button"
+                                    class="btn btn-default btn-sm"
+                                    data-toggle="modal" data-target="#orderSupply">
                                 <span class="glyphicon glyphicon-download"></span> Заказать товар
                             </button>
                         </td>
@@ -81,24 +86,67 @@
                     </div>
                     <div class="form-group" ng-class="{ 'has-error': form.price.$dirty && form.price.$error.required }">
                         <label for="name">Цена</label>
-                        <input type="text" name="price" id="price" class="form-control" ng-model="vm.newGoods.price"
+                        <input type="number" name="price" id="price" class="form-control" ng-model="vm.newGoods.price"
                                required/>
                         <span ng-show="form.price.$dirty && form.price.$error.required"
                               class="help-block">Цена - обязательное поле</span>
                     </div>
-                    <!--<div ng-if="vm.editionForm" class="form-group"
-                         ng-class="{ 'has-error': form.quantity.$dirty && form.quantity.$error.required }">
-                        <label for="name">Количество</label>
-                        <input type="text" name="quantity" id="quantity" class="form-control"
-                               ng-model="vm.newGoods.quantity" required/>
-                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>
-                    </div>-->
                     <div class="form-group" ng-class="{ 'has-error': form.about.$dirty && form.about.$error.required }">
                         <label for="name">Коротко о товаре:</label>
                         <input type="text" name="about" id="about" class="form-control" ng-model="vm.newGoods.about"
                                required/>
                         <span ng-show="form.about.$dirty && form.about.$error.required"
                               class="help-block">О вас - обязательное поле</span>
+                    </div>
+                    <div class="modal-footer">
+                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">
+                            Принять
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="modal fade" id="orderSupply" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Заказать</h4>
+                </div>
+                <form name="form" ng-submit="vm.formAction()" role="form"
+                      style="padding-left: 10px; padding-right: 10px">
+                    <div class="form-group"
+                         ng-class="{ 'has-error': form.supplier.$dirty && form.supplier.$error.required }">
+                        <label for="supplier">Поставщик</label>
+                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"
+                                required>
+                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>
+                        </select>
+                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"
+                              class="help-block">Поставщик - обязательное поле</span>
+                    </div>
+                    <div class="form-group"
+                         ng-class="{ 'has-error': form.supplier.$dirty && form.supplier.$error.required }">
+                        <label for="supplier">Склад</label>
+                        <br/>
+                        <label ng-repeat="a in vm.addresses" class="radio-inline">
+                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">
+                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}
+                        </label>
+                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"
+                              class="help-block">Поставщик - обязательное поле</span>
+                    </div>
+                    <div class="form-group"
+                         ng-class="{ 'has-error': form.quantity.$dirty && form.quantity.$error.required }">
+                        <label for="quantity">Количество</label>
+                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"
+                               ng-model="vm.newSupply.quantity" required/>
+                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>
                     </div>
                     <div class="modal-footer">
                         <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">
