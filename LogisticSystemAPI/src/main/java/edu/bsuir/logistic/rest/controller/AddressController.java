@@ -1,6 +1,7 @@
 package edu.bsuir.logistic.rest.controller;
 
 import edu.bsuir.logistic.rest.model.Address;
+import edu.bsuir.logistic.rest.model.Buy;
 import edu.bsuir.logistic.rest.model.Goods;
 import edu.bsuir.logistic.rest.model.User;
 import edu.bsuir.logistic.rest.service.AddressService;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -63,6 +66,21 @@ public class AddressController {
             }
         }
         return new ResponseEntity<>(stores, HttpStatus.OK);
+    }
+
+    //-------------------Retrieve All Addresses For Current User----------------------------------------
+
+    @RequestMapping(value = "/rest/get/addresses/user", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Address>> listAllAddressesOfCurrentUser() {
+        List<Address> addresses = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user == null)
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        addresses.addAll(user.getAddressSet());
+        return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
     //-------------------Retrieve Address without Current Goods--------------------------------------------------------

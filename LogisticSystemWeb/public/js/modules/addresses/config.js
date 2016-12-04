@@ -10,7 +10,7 @@ module.exports = [
                 controllerAs: 'vm',
                 template: require('./template.html'),
                 data: {
-                    authorizedRoles: ['ADMIN']
+                    authorizedRoles: ['ADMIN', 'USER']
                 }
             });
     }

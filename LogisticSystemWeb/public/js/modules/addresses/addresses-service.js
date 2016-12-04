@@ -14,6 +14,7 @@ module.exports = [
 
         service.getAll = getAll;
         service.getAllStores = getAllStores;
+        service.getAllAddresses = getAllAddresses;
         service.getStoresForCurrentGoods = getStoresForCurrentGoods;
         service.create = create;
         service.update = update;
@@ -27,8 +28,13 @@ module.exports = [
         }
 
         function getAllStores() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/stores').then(handleSuccess,
-                handleError('Ошибка при получении всех складов'));
+            return $http.get(REST_SERVICE_URI + 'rest/get/stores')
+                .then(handleSuccess, handleError('Ошибка при получении всех складов'));
+        }
+
+        function getAllAddresses() {
+            return $http.get(REST_SERVICE_URI + 'rest/get/addresses/user')
+                .then(handleSuccess, handleError('Ошибка при получении всех складов'));
         }
 
         function getStoresForCurrentGoods(id) {

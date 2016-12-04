@@ -213,7 +213,8 @@ public class PurchaseController {
     //------------------- Update a Purchase --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/purchase/{id}/{newGoods}", method = RequestMethod.PUT)
-    public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id, @PathVariable("newGoods") int newGoods,
+    public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id, 
+                                               @PathVariable("newGoods") int newGoods,
                                                @RequestBody Purchase purchase) {
         System.out.println("Updating Purchase " + id);
 

@@ -16,14 +16,36 @@
              ng-class="{'text-align-center': !isCollapsed}"
              uib-collapse="isCollapsed">
             <ul class="nav navbar-nav navbar-right margin-right-5">
-                <li><a ng-if="isAdmin()" href="#/users">Пользователи</a></li>
-                <li><a href="#/goods">Товары</a></li>
-                <li><a ng-if="isAdmin()" href="#/addresses">Склады</a></li>
-                <li><a ng-if="isAdmin()" href="#/purchases">Заказы на поставку <span
-                        class="badge">{{countNonConfirmPurchases}}</span></a></li>
-                <li ng-click="logout()"><a ng-if="isAdmin()" href="#/logout" class="cursor-pointer">Выйти</a></li>
-                <li ng-click="logout()"><a ng-if="isUser()" href="#/logout" class="cursor-pointer">{{user.name}} |
-                    Выйти</a></li>
+                <li>
+                    <a ng-click="refresh()" ng-if="isAdmin()" href="#/users">
+                        <i class="fa fa-users" aria-hidden="true"></i> Пользователи
+                    </a>
+                </li>
+                <li><a ng-click="refresh()" href="#/goods">Товары</a></li>
+                <li><a ng-click="refresh()" ng-if="isAdmin()" href="#/addresses">Склады</a></li>
+                <li><a ng-click="refresh()" ng-if="isUser()" href="#/addresses">Магазины</a></li>
+                <li>
+                    <a ng-click="refresh()" href="#/purchases">
+                        <i class="fa fa-shopping-cart" aria-hidden="true"></i> Заказы на поставку
+                        <span ng-if="countNonConfirmPurchases > 0" class="badge">{{countNonConfirmPurchases}}</span>
+                    </a>
+                </li>
+                <li ng-click="logout()">
+                    <a ng-if="isAdmin()" href="#/logout" class="cursor-pointer">
+                        <span class="glyphicon glyphicon-off"></span> Выйти
+                    </a>
+                </li>
+                <li ng-if="isUser()" class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">{{user.name}}<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">
+                            <i class="fa fa-user-o" aria-hidden="true"></i> Профиль</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li ng-click="logout()"><a href="#/logout"><span class="glyphicon glyphicon-off"></span>
+                            Выйти</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </nav>

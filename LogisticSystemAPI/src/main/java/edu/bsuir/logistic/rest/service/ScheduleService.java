@@ -50,7 +50,7 @@ public class ScheduleService {
                 Date todayDate = dateFormatAddition.parse(dateFormat.format(new Date()));
                 int diffInDays = (int) ((todayDate.getTime() - buyDate.getTime()) / (1000 * 60 * 60 * 24));
                 if (buy.getClient().getIdUser().equals(purchase.getClient().getIdUser()) &&
-                        buy.getGoods().getIdGoods().equals(purchase.getGoods().getIdGoods()) /*&& buy.isCompleted()*/) {
+                        buy.getGoods().getIdGoods().equals(purchase.getGoods().getIdGoods()) && buy.isCompleted()) {
                     if (diffInDays < lastDiffInDays)
                         lastDiffInDays = diffInDays;
                     flag = true;

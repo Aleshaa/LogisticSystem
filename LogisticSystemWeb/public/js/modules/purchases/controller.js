@@ -8,20 +8,28 @@ module.exports = [
     'goodsService',
     'addressService',
     'buyService',
-    function (purchaseService, authService, supplierService, supplyService, goodsService, addressService, buyService) {
+    'userService',
+    function (purchaseService, authService, supplierService, supplyService, goodsService, addressService, buyService, userService) {
         var vm = this;
 
         vm.suppliers = [];
         vm.addresses = [];
         vm.purchases = [];
+        vm.goods = [];
         vm.newSupply = {};
+        vm.newPurchase = {};
         vm.currentGoods = {};
+        vm.currentUser = {};
         vm.countOfNonComplete = 0;
+        vm.creationForm = false;
+        vm.editionForm = false;
         vm.orderForm = false;
         vm.dataLoading = true;
         vm.formAction = formAction;
         vm.getCountOfNonComplete = getCountOfNonComplete;
         vm.isAdmin = isAdmin;
+        vm.showEditForm = showEditForm;
+        vm.showCreationForm = showCreationForm;
         vm.showOrderForm = showOrderForm;
         vm.confirm = confirm;
         vm.remove = remove;
@@ -30,6 +38,8 @@ module.exports = [
 
         function initController() {
             getCountOfNonComplete();
+            getCurrentUser();
+            loadAllGoods();
             loadAllPurchases();
             loadAllSuppliers();
             loadAllAddresses();
@@ -38,13 +48,34 @@ module.exports = [
 
         function formAction() {
             vm.dataLoading = true;
-            if (vm.orderForm) {
+            if (vm.editionForm) {
+                edit();
+            }
+            else if (vm.creationForm) {
+                create();
+            }
+            else if (vm.orderForm) {
                 createSupply();
             }
         }
 
         function isAdmin() {
             return authService.checkRole(['ADMIN']);
+        }
+
+        function showCreationForm() {
+            vm.newPurchase = {};
+            vm.creationForm = true;
+            vm.editionForm = false;
+        }
+
+        function showEditForm(purchase) {
+            vm.newPurchase.idPurchase = purchase.idPurchase;
+            vm.newPurchase.goods = purchase.goods.idGoods;
+            vm.newPurchase.frequency = purchase.frequency;
+            vm.newPurchase.quantity = purchase.quantity;
+            vm.editionForm = true;
+            vm.creationForm = false;
         }
 
         function showOrderForm(goods) {
@@ -74,6 +105,40 @@ module.exports = [
                         vm.dataLoading = false;
                     } else {
                         console.log("Что-то пошло не так")
+                    }
+                });
+        }
+
+        function create() {
+            var idGoods = vm.newPurchase.goods;
+            delete vm.newPurchase.goods;
+            purchaseService.create(vm.currentUser.idUser, idGoods, vm.newPurchase)
+                .then(function (response) {
+                    if (response.success) {
+                        loadAllPurchases();
+                        vm.creationForm = false;
+                        vm.newPurchase = {};
+                        vm.dataLoading = false;
+                    } else {
+                        console.log("Что-то пошло не так");
+                        console.log(response.message);
+                    }
+                });
+        }
+
+        function edit() {
+            var idGoods = vm.newPurchase.goods;
+            delete vm.newPurchase.goods;
+            purchaseService.update(vm.newPurchase, idGoods)
+                .then(function (response) {
+                    if (response.success) {
+                        loadAllPurchases();
+                        vm.editionForm = false;
+                        vm.newPurchase = {};
+                        vm.dataLoading = false;
+                    } else {
+                        console.log("Что-то пошло не так");
+                        console.log(response.message);
                     }
                 });
         }
@@ -123,6 +188,13 @@ module.exports = [
                 })
         }
 
+        function loadAllGoods() {
+            goodsService.getAll()
+                .then(function (goods) {
+                    vm.goods = goods.data;
+                });
+        }
+
         function getCountOfNonComplete() {
             buyService.getCountOfNonComplete()
                 .then(function (count) {
@@ -132,6 +204,13 @@ module.exports = [
                         console.log(count.message);
                     }
                 })
+        }
+
+        function getCurrentUser() {
+            userService.getCurrentUser()
+                .then(function (user) {
+                    vm.currentUser = user.data;
+                });
         }
     }
 ];

@@ -13,6 +13,7 @@ module.exports = [
         var REST_SERVICE_URI = 'http://localhost:8080';
 
         var userRole = "";
+        var authStatus = true;
         service.Login = Login;
         service.SetCredentials = SetCredentials;
         service.ClearCredentials = ClearCredentials;
@@ -24,18 +25,23 @@ module.exports = [
         return service;
 
         function Login(username, password, callback) {
+            authStatus = false;
             SetCredentials(username, password);
             $http.get(REST_SERVICE_URI + '/rest/authenticate', {})
                 .success(function (response) {
                     userRole = response.role.nameRole;
+                    $rootScope.globals = {};
                     localStorageService.remove('globals');
                     $http.defaults.headers.common.Authorization = 'Basic';
+                    authStatus = true;
                     response = {success: true};
                     callback(response);
                 })
                 .error(function (response, status) {
                     response = {success: false, message: 'Имя пользователя или пароль неверны'};
+                    $rootScope.globals = {};
                     localStorageService.remove('globals');
+                    console.log("ОЧИСТИЛИ ГЛОБАЛС");
                     $http.defaults.headers.common.Authorization = 'Basic';
                     console.error('error', status, response);
                     callback(response);
@@ -72,7 +78,7 @@ module.exports = [
         }
 
         function isAuth() {
-            return localStorageService.get('globals') ? true : false;
+            return authStatus ? localStorageService.get('globals') ? true : false : authStatus;
         }
 
         function getAuthUser() {

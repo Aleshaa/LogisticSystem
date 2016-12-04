@@ -37,7 +37,7 @@ module.exports = [
         }
 
         function confirm(id) {
-            return $http.post(REST_SERVICE_URI + 'rest/update/purchase/' + id + '/confirm')
+            return $http.put(REST_SERVICE_URI + 'rest/update/purchase/' + id + '/confirm')
                 .then(handleSuccess, handleError('Ошибка при подтверждении поставки'));
         }
 
