@@ -72,6 +72,17 @@
                               class="help-block">Поставщик - обязательное поле</span>
                     </div>
                     <div class="form-group"
+                         ng-class="{ 'has-error': form.supplier.$dirty && form.supplier.$error.required }">
+                        <label for="supplier">Склад</label>
+                        <br/>
+                        <label ng-repeat="a in vm.addresses" class="radio-inline">
+                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">
+                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}
+                        </label>
+                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"
+                              class="help-block">Поставщик - обязательное поле</span>
+                    </div>
+                    <div class="form-group"
                          ng-class="{ 'has-error': form.quantity.$dirty && form.quantity.$error.required }">
                         <label for="quantity">Количество</label>
                         <input type="number" min="0" name="quantity" id="quantity" class="form-control"

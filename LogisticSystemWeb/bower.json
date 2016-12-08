@@ -30,6 +30,7 @@
     "angular-treeview": "*",
     "ng-dialog": "^0.6.4",
     "angularjs-slider": "^5.8.3",
-    "angular-scroll": "~1.0.0"
+    "angular-scroll": "~1.0.0",
+    "angular-google-chart": "0.1.0"
   }
 }

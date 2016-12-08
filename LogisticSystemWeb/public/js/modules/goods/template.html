@@ -2,9 +2,11 @@
     <div class="row">
         <div class="col-sm-2">
             <ul id="sidebar" class="nav nav-stacked affix">
-                <li><a ng-if="vm.isAdmin()" href="#/suppliers">Поставщики</a></li>
-                <li><a ng-if="vm.isAdmin()" href="#/supplies">Поставки</a></li>
-                <li><a href="#">Статистики</a></li>
+                <li><a ng-if="vm.isAdmin()" href="#/suppliers"><i class="fa fa-truck" aria-hidden="true"></i>Поставщики</a>
+                </li>
+                <li><a ng-if="vm.isAdmin()" href="#/supplies"><i class="fa fa-download" aria-hidden="true"></i>Поставки</a>
+                </li>
+                <li><a href="#/goods-stat"><i class="fa fa-pie-chart" aria-hidden="true"></i>Статистики</a></li>
             </ul>
         </div>
         <div class="col-sm-10">

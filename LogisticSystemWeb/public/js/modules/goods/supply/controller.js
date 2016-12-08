@@ -5,13 +5,15 @@ module.exports = [
     'supplyService',
     'goodsService',
     'supplierService',
-    function ($scope, supplyService, goodsService, supplierService) {
+    'addressService',
+    function ($scope, supplyService, goodsService, supplierService, addressService) {
         var vm = this;
 
         vm.supplies = [];
         vm.newSupply = {};
         vm.goods = [];
         vm.suppliers = [];
+        vm.addresses = [];
         vm.creationForm = false;
         vm.editionForm = false;
         vm.dataLoading = true;
@@ -36,6 +38,7 @@ module.exports = [
             loadAllSupplies();
             loadAllGoods();
             loadAllSuppliers();
+            loadAllAddresses();
             vm.dataLoading = false;
             vm.newSupply = {};
         }
@@ -69,13 +72,15 @@ module.exports = [
         function create() {
             var idGoods = vm.newSupply.goods;
             var idSupplier = vm.newSupply.supplier;
+            var idAddress = vm.newSupply.address;
             delete vm.newSupply.goods;
             delete vm.newSupply.supplier;
+            delete vm.newSupply.address;
             var date = new Date();
             vm.newSupply.date = date.getFullYear() + "-" +
                 ((date.getMonth() + 1) < 10 ? ("0" + (date.getMonth() + 1)) : (date.getMonth() + 1)) + "-" +
                 (date.getDate() < 10 ? ("0" + date.getDate()) : date.getDate());
-            supplyService.create(vm.newSupply, idSupplier, idGoods)
+            supplyService.create(vm.newSupply, idSupplier, idGoods, idAddress)
                 .then(function (response) {
                     if (response.success) {
                         loadAllSupplies();
@@ -121,6 +126,13 @@ module.exports = [
                 .then(function (suppliers) {
                     vm.suppliers = suppliers.data;
                 });
+        }
+
+        function loadAllAddresses() {
+            addressService.getAllStores()
+                .then(function (addresses) {
+                    vm.addresses = addresses.data;
+                })
         }
     }
 ];

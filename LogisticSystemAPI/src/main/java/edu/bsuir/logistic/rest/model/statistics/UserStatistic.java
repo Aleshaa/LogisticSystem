@@ -25,7 +25,7 @@ public class UserStatistic {
     /**
      * The count of payment for current User
      *
-     * @see #countOfPayments
+         * @see #countOfPayments
      */
     private double countOfPayments;
 

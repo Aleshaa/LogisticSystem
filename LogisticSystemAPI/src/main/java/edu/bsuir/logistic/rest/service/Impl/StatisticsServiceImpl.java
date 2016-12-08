@@ -47,7 +47,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             for (Buy buy : userBuys) {
                 amountOfPayment += buy.getQuantity() * buy.getGoods().getPrice();
             }
-
+            userStat.setUser(user);
             userStat.setCountOfPayments(userBuys.size());
             userStat.setAmountOfPayments(amountOfPayment);
             usersStat.add(userStat);
@@ -64,7 +64,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (Buy buy : userBuys) {
             amountOfPayment += buy.getQuantity() * buy.getGoods().getPrice();
         }
-
+        userStat.setUser(user);
         userStat.setCountOfPayments(userBuys.size());
         userStat.setAmountOfPayments(amountOfPayment);
         return userStat;
@@ -82,6 +82,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             for (Buy buy : buyList) {
                 profit += buy.getQuantity() * goods.getPrice();
             }
+            goodsStat.setGoods(goods);
             goodsStat.setBroughtProfit(profit);
             goodsStat.setCountOfPurchases(buyList.size());
             goodsStats.add(goodsStat);
@@ -106,6 +107,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                     count++;
                 }
             }
+            goodsStat.setGoods(goods);
             goodsStat.setBroughtProfit(profit);
             goodsStat.setCountOfPurchases(count);
             goodsStats.add(goodsStat);
