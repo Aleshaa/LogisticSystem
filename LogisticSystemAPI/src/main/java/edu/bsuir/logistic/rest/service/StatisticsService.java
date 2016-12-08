@@ -15,7 +15,7 @@ public interface StatisticsService {
 
     List<UserStatistic> getUsersStatistics();
 
-    UserStatistic getUserStatisctics(User user);
+    UserStatistic getUserStatistics(User user);
 
     List<GoodsStatistics> getGoodsStatistics();
 
