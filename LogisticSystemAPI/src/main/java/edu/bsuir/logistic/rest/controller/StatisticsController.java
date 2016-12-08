@@ -1,8 +1,13 @@
 package edu.bsuir.logistic.rest.controller;
 
+import edu.bsuir.logistic.rest.model.Buy;
+import edu.bsuir.logistic.rest.model.Supply;
 import edu.bsuir.logistic.rest.model.User;
+import edu.bsuir.logistic.rest.model.statistics.GoodsStatistics;
 import edu.bsuir.logistic.rest.model.statistics.UserStatistic;
+import edu.bsuir.logistic.rest.service.BuyService;
 import edu.bsuir.logistic.rest.service.StatisticsService;
+import edu.bsuir.logistic.rest.service.SupplyService;
 import edu.bsuir.logistic.rest.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +38,12 @@ public class StatisticsController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    SupplyService supplyService;
+
+    @Autowired
+    BuyService buyService;
+
     /**
      * Get statistics for all users
      *
@@ -54,7 +65,7 @@ public class StatisticsController {
      *
      * @return
      */
-    @RequestMapping(value = "/rest/get/users/stat", method = RequestMethod.GET, produces = MediaType
+    @RequestMapping(value = "/rest/get/user/stat", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<UserStatistic> getCurrentUserStat() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -66,5 +77,70 @@ public class StatisticsController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(stat, HttpStatus.OK);
+    }
+
+    /**
+     * Get Goods statistics
+     *
+     * @return
+     */
+    @RequestMapping(value = "/rest/get/goods/stat", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GoodsStatistics>> getGoodsStat() {
+        List<GoodsStatistics> stats = statisticsService.getGoodsStatistics();
+        if (stats.isEmpty()) {
+            LOGGER.info("Goods statistics is empty");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(stats, HttpStatus.OK);
+    }
+
+    /**
+     * Get Goods statistics for current User
+     *
+     * @return
+     */
+    @RequestMapping(value = "/rest/get/goods/user/stat", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GoodsStatistics>> getGoodsStatForCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        List<GoodsStatistics> stats = statisticsService.getGoodsStatisticsForCurrentUser(user);
+        if (stats.isEmpty()) {
+            LOGGER.info("Goods statistics is empty");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(stats, HttpStatus.OK);
+    }
+
+    /**
+     * Get supply stat
+     *
+     * @return
+     */
+    @RequestMapping(value = "/rest/get/supply/stat", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Supply>> getSuppliesStat() {
+        List<Supply> supplies = supplyService.findAll();
+        if (supplies.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(supplies, HttpStatus.OK);
+    }
+
+    /**
+     * Get buy stat
+     *
+     * @return
+     */
+    @RequestMapping(value = "/rest/get/buy/stat", method = RequestMethod.GET, produces = MediaType
+            .APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Buy>> getBuysStat() {
+        List<Buy> buyList = buyService.findAll();
+        if (buyList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(buyList, HttpStatus.OK);
     }
 }
