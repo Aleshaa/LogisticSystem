@@ -39,7 +39,7 @@ public class Goods implements Serializable {
     @Column(name = "price", nullable = false)
     private float price;
 
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinTable(name = "m2m_goods_address",
             joinColumns = {@JoinColumn(name = "idGoods")},
             inverseJoinColumns = {@JoinColumn(name = "idAddress")})

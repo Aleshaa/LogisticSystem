@@ -90,9 +90,27 @@ public class UserController {
         currentUser.setAbout(user.getAbout());
         currentUser.setPhone(user.getPhone());
         currentUser.setEmail(user.getEmail());
-        currentUser.setPassword(user.getPassword());
 
         userService.updateUser(currentUser);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    //------------------- Change User password --------------------------------------------------------
+
+    @RequestMapping(value = "/rest/update/user/password/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<Void> changePassword(@PathVariable("id") int id, @RequestBody User user) {
+        System.out.println("Updating User " + id);
+
+        User currentUser = userService.findById(id);
+
+        if (currentUser == null) {
+            LOGGER.debug("User with id " + id + " not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        currentUser.setPassword(user.getPassword());
+
+        userService.changePassword(currentUser);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

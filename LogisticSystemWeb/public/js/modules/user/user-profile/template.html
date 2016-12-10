@@ -1,0 +1,71 @@
+<nav class="navbar navbar-inverse sidebar" role="navigation" style="margin-top:50px">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-sidebar-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Личный кабинет</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-sidebar-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="#">Редактировать<span style="font-size:16px;"
+                                                   class="pull-right hidden-xs showopacity glyphicon glyphicon-pencil"></span></a>
+                </li>
+                <li><a href="#">Сменить пароль<span style="font-size:16px;"
+                                                    class="pull-right hidden-xs showopacity glyphicon glyphicon-lock"></span></a>
+                </li>
+                <li><a href="#/user-stat">Статистика<span style="font-size:16px;"
+                                                          class="pull-right hidden-xs showopacity fa fa-bar-chart"></span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="main">
+    <div class="container" align="center" style="margin-top:70px">
+        <div id="wrapper" class="toggled">
+            <div id="page-content-wrapper">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1>Ваш профиль:</h1>
+                            <table class="table">
+                                <input type="hidden" name="idUser" value="${user.idUser}"/>
+                                <tr>
+                                    <td>Название компании:</td>
+                                    <td>{{vm.user.name}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Контактный email:</td>
+                                    <td>{{vm.user.email}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Контактный телефон:</td>
+                                    <td>{{vm.user.phone}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Username:</td>
+                                    <td>{{vm.user.username}}</td>
+                                </tr>
+                                <tr>
+                                    <td>О вас:</td>
+                                    <td>{{vm.user.about}}</td>
+                                </tr>
+                            </table>
+                            <img ng-if="vm.dataLoading"
+                                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

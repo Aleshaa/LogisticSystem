@@ -46,7 +46,7 @@ public class Address implements Serializable {
     @Column(name = "Number", nullable = false)
     private int Number;
 
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinTable(name = "m2m_goods_address",
             joinColumns = {@JoinColumn(name = "idAddress")},
             inverseJoinColumns = {@JoinColumn(name = "idGoods")})

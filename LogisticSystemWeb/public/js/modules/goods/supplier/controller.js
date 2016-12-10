@@ -3,7 +3,8 @@
 module.exports = [
     '$scope',
     'supplierService',
-    function ($scope, supplierService) {
+    'flashService',
+    function ($scope, supplierService, flashService) {
         var vm = this;
 
         vm.suppliers = [];
@@ -53,8 +54,11 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllSuppliers();
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });
@@ -67,8 +71,11 @@ module.exports = [
                         loadAllSuppliers();
                         vm.creationForm = false;
                         vm.newSupplier = {};
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });
@@ -81,8 +88,11 @@ module.exports = [
                         loadAllSuppliers();
                         vm.editionForm = false;
                         vm.newSupplier = {};
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });

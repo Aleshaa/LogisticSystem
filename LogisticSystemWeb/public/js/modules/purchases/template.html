@@ -3,20 +3,60 @@
         <div class="col-sm-2">
             <ul id="sidebar" class="nav nav-stacked affix">
                 <li>
-                    <a href="#/buys">История поставок
+                    <a href="#/buys"><i class="fa fa-history" aria-hidden="true"></i>История поставок
                         <span ng-if="vm.countOfNonComplete > 0" class="badge">
                             {{vm.countOfNonComplete}}
                         </span>
                     </a>
                 </li>
-                <li><a href="#">Статистика</a></li>
             </ul>
         </div>
         <div class="col-sm-10">
+            <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }"
+                 ng-if="flash" ng-bind="flash.message"></div>
             <div class="panel panel-default">
                 <!-- Default panel contents -->
                 <div class="panel-heading">Заказы:</div>
 
+                <div class="custom-search">
+                    <label for="nameSearch">Поиск по товару:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="clientSearch">Поиск по клиенту:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="clientSearch" ng-model="search.client.name">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="frequencySearch">Поиск по периодичности: </label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="frequencySearch" ng-model="search.frequency">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="quantitySearch">Поиск по количеству: </label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <br>
                 <!-- Table -->
                 <table class="table table-hover">
                     <thead>
@@ -30,7 +70,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="p in vm.purchases"
+                    <tr ng-repeat="p in vm.purchases | filter:search:strict"
                         class="{{p.confirmed == false && p.goods.quantity === 0 ? 'danger' : (
                         (p.confirmed == false && p.goods.quantity != 0) ||
                         (p.confirmed == true && p.goods.quantity === 0) ? 'warning' : 'success'

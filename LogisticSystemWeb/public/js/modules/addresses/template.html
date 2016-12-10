@@ -1,10 +1,41 @@
 <div class="container" style="margin-top:70px">
     <div class="row">
         <div class="col-sm-12">
+            <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }"
+                 ng-if="flash" ng-bind="flash.message"></div>
             <div class="panel panel-default">
                 <!-- Default panel contents -->
                 <div class="panel-heading">Склады:</div>
-
+                <div class="custom-search">
+                    <label for="countrySearch">Поиск по стране:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="countrySearch" ng-model="search.country">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="citySearch">Поиск по городу:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="citySearch" ng-model="search.city">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="streetSearch">Поиск по улице: </label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="streetSearch" ng-model="search.street">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <br>
                 <!-- Table -->
                 <table class="table table-hover">
                     <thead>
@@ -16,7 +47,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="s in vm.stores">
+                    <tr ng-repeat="s in vm.stores | filter:search:strict">
                         <td>{{s.country}}</td>
                         <td>{{s.city}}</td>
                         <td>{{s.street}}, {{s.number}}</td>

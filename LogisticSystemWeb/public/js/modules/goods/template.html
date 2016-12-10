@@ -2,19 +2,52 @@
     <div class="row">
         <div class="col-sm-2">
             <ul id="sidebar" class="nav nav-stacked affix">
-                <li><a ng-if="vm.isAdmin()" href="#/suppliers">Поставщики</a></li>
-                <li><a ng-if="vm.isAdmin()" href="#/supplies">Поставки</a></li>
-                <li><a href="#">Статистики</a></li>
+                <li><a ng-if="vm.isAdmin()" href="#/suppliers"><i class="fa fa-truck" aria-hidden="true"></i>Поставщики</a>
+                </li>
+                <li><a ng-if="vm.isAdmin()" href="#/supplies"><i class="fa fa-download" aria-hidden="true"></i>Поставки</a>
+                </li>
+                <li><a href="#/goods-stat"><i class="fa fa-pie-chart" aria-hidden="true"></i>Статистики</a></li>
             </ul>
         </div>
         <div class="col-sm-10">
+            <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }"
+                 ng-if="flash" ng-bind="flash.message"></div>
             <ul class="breadcrumb">
                 <li class="active">Товары</li>
             </ul>
             <div class="panel panel-default">
                 <!-- Default panel contents -->
                 <div class="panel-heading">Доступные товары</div>
-
+                <div class="custom-search">
+                    <label for="nameSearch">Поиск по названию:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.name">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="quantitySearch">Поиск по количеству:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="priceSearch">Поиск по цене: </label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="priceSearch" ng-model="search.price">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <br>
                 <!-- Table -->
                 <table class="table table-hover">
                     <thead>
@@ -28,7 +61,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="g in vm.goods" class="{{g.quantity > 0 ? '' : 'danger'}}">
+                    <tr ng-repeat="g in vm.goods | filter:search:strict" class="{{g.quantity > 0 ? '' : 'danger'}}">
                         <td>{{g.name}}</td>
                         <td>{{g.quantity}}</td>
                         <td>{{g.price}}</td>
@@ -41,15 +74,20 @@
                             </ul>
                         </td>
                         <td>
-                            <button ng-click="vm.showEditForm(g)" ctype="button" class="btn btn-default btn-sm"
+                            <button ng-if="vm.isAdmin()"
+                                    ng-click="vm.showEditForm(g)"
+                                    ctype="button" class="btn btn-default btn-sm"
                                     data-toggle="modal" data-target="#myModal">
                                 <span class="glyphicon glyphicon-edit"></span> Редактировать
                             </button>
-                            <button ng-click="vm.remove(g.idGoods)" type="button" class="btn btn-default btn-sm">
+                            <button ng-if="vm.isAdmin()"
+                                    ng-click="vm.remove(g.idGoods)"
+                                    type="button" class="btn btn-default btn-sm">
                                 <span class="glyphicon glyphicon-remove"></span> Удалить
                             </button>
-                            <button ng-if="g.quantity == 0" ng-click="vm.showOrderForm(g)" ctype="button"
-                                    class="btn btn-default btn-sm"
+                            <button ng-if="g.quantity == 0 && vm.isAdmin()"
+                                    ng-click="vm.showOrderForm(g)"
+                                    ctype="button" class="btn btn-default btn-sm"
                                     data-toggle="modal" data-target="#orderSupply">
                                 <span class="glyphicon glyphicon-download"></span> Заказать товар
                             </button>
@@ -58,8 +96,10 @@
                     </tbody>
                 </table>
             </div>
-            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"
-                    data-target="#myModal">
+            <button ng-if="vm.isAdmin()"
+                    ng-click="vm.showCreationForm()"
+                    ctype="button" class="btn btn-info btn-lg"
+                    data-toggle="modal" data-target="#myModal">
                 Добавить
             </button>
             <img ng-if="vm.dataLoading"
