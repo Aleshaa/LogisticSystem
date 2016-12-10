@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static edu.bsuir.logistic.rest.model.RolesEnum.ADMIN;
 
 /**
  * @author alku0916
@@ -137,10 +140,19 @@ public class StatisticsController {
     @RequestMapping(value = "/rest/get/buy/stat", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Buy>> getBuysStat() {
-        List<Buy> buyList = buyService.findAll();
-        if (buyList.isEmpty()) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        User user = userService.findByUsername(name);
+        if (user.getRole().getIdRole().equals(ADMIN.getValue())) {
+            List<Buy> allBuys = buyService.findAll();
+            if (allBuys.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(allBuys, HttpStatus.OK);
+        }
+        List<Buy> listBuys = new ArrayList<>(user.getBuySet());
+        if (listBuys.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(buyList, HttpStatus.OK);
+        return new ResponseEntity<>(listBuys, HttpStatus.OK);
     }
 }

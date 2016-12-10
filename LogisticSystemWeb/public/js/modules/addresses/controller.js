@@ -4,7 +4,8 @@ module.exports = [
     '$scope',
     'addressService',
     'userService',
-    function ($scope, addressService, userService) {
+    'flashService',
+    function ($scope, addressService, userService, flashService) {
         var vm = this;
 
         vm.stores = [];
@@ -52,12 +53,15 @@ module.exports = [
 
         function remove(idStore) {
             vm.dataLoading = true;
-            addressService.Delete(idStore)
+            addressService.remove(idStore)
                 .then(function (response) {
                     if (response.success) {
                         loadAllStores();
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });
@@ -68,10 +72,13 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllStores();
+                        flashService.Success(response.message);
+                        vm.dataLoading = false;
                         vm.creationForm = false;
                         vm.newStore = {};
-                        vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });
@@ -82,10 +89,13 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllStores();
+                        flashService.Success(response.message);
+                        vm.dataLoading = false;
                         vm.editionForm = false;
                         vm.newStore = {};
-                        vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });

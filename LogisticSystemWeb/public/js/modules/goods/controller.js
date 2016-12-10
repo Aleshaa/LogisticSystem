@@ -7,7 +7,8 @@ module.exports = [
     'authService',
     'supplierService',
     'supplyService',
-    function ($scope, goodsService, addressService, authService, supplierService, supplyService) {
+    'flashService',
+    function ($scope, goodsService, addressService, authService, supplierService, supplyService, flashService) {
         var vm = this;
 
         vm.goods = [];
@@ -80,6 +81,8 @@ module.exports = [
                         loadAllGoods();
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });
@@ -91,10 +94,13 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllGoods();
+                        flashService.Success(response.message);
                         vm.creationForm = false;
                         vm.newGoods = {};
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });
@@ -110,6 +116,8 @@ module.exports = [
                         vm.newGoods = {};
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });

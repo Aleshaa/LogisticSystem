@@ -8,10 +8,12 @@ module.exports = [
 
         vm.data = [];
         vm.userData = [];
+        vm.dataLoading = false;
         vm.isAdmin = isAdmin;
         initController();
 
         function initController() {
+            vm.dataLoading = true;
             loadData();
         }
 
@@ -30,6 +32,7 @@ module.exports = [
                     .then(function (stats) {
                         vm.data = stats.data;
                         loadCharts();
+                        vm.dataLoading = false;
                     });
             }
             else {
@@ -37,6 +40,7 @@ module.exports = [
                     .then(function (stats) {
                         vm.data = stats.data;
                         loadCharts();
+                        vm.dataLoading = false;
                     });
             }
         }

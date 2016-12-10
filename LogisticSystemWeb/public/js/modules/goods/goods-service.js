@@ -48,13 +48,17 @@ module.exports = [
         function handleSuccess(res) {
             return {
                 success: true,
-                data: res.data
+                data: res.data,
+                message: "Операция выполнена успешно!"
             };
         }
 
         function handleError(error) {
             return function () {
-                return {success: false, message: error};
+                return {
+                    success: false,
+                    message: error
+                };
             };
         }
 

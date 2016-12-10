@@ -1,5 +1,7 @@
 <div class="col-md-6 col-md-offset-3">
-    <h2>Register</h2>
+    <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }"
+         ng-if="flash" ng-bind="flash.message"></div>
+    <h2>Регистрация</h2>
     <form name="form" ng-submit="vm.register()" role="form">
         <div class="form-group" ng-class="{ 'has-error': form.name.$dirty && form.name.$error.required }">
             <label for="username">Название компании</label>

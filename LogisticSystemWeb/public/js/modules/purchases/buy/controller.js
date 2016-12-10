@@ -3,7 +3,8 @@
 module.exports = [
     'buyService',
     'authService',
-    function (buyService, authService) {
+    'flashService',
+    function (buyService, authService, flashService) {
         var vm = this;
 
         vm.buys = [];
@@ -29,8 +30,11 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllBuys();
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log(response.message)
                     }
                 });
@@ -42,8 +46,11 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllBuys();
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });

@@ -9,7 +9,10 @@ module.exports = [
     'addressService',
     'buyService',
     'userService',
-    function (purchaseService, authService, supplierService, supplyService, goodsService, addressService, buyService, userService) {
+    'flashService',
+    function (purchaseService, authService, supplierService,
+              supplyService, goodsService, addressService,
+              buyService, userService, flashService) {
         var vm = this;
 
         vm.suppliers = [];
@@ -89,8 +92,11 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log(response.message)
                     }
                 });
@@ -102,8 +108,11 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
+                        flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });
@@ -116,10 +125,13 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
+                        flashService.Success(response.message);
                         vm.creationForm = false;
                         vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так");
                         console.log(response.message);
                     }
@@ -133,10 +145,13 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
+                        flashService.Success(response.message);
                         vm.editionForm = false;
                         vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так");
                         console.log(response.message);
                     }
@@ -171,11 +186,14 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
+                        flashService.Success(response.message);
                         vm.orderForm = false;
                         vm.currentGoods = {};
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log(response.message)
                     }
                 });
@@ -201,6 +219,8 @@ module.exports = [
                     if (count.success) {
                         vm.countOfNonComplete = count.data;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log(count.message);
                     }
                 })

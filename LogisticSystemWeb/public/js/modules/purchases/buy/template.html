@@ -2,10 +2,15 @@
     <div class="row">
         <div class="col-sm-2">
             <ul id="sidebar" class="nav nav-stacked affix">
-                <li><a href="#">Статистика</a></li>
+                <li><a href="#/buy-stat">
+                    <i class="fa fa-line-chart" aria-hidden="true"></i>
+                    Статистика
+                </a></li>
             </ul>
         </div>
         <div class="col-sm-10">
+            <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }"
+                 ng-if="flash" ng-bind="flash.message"></div>
             <ul class="breadcrumb">
                 <li><a href="#/purchases">Заказы на поставку</a></li>
                 <li class="active">Поставки клиенту</li>
@@ -13,7 +18,36 @@
             <div class="panel panel-default">
                 <!-- Default panel contents -->
                 <div class="panel-heading">Поставки клиенту</div>
-
+                <div class="custom-search">
+                    <label for="nameSearch">Поиск по товару:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="clientSearch">Поиск по клиенту:</label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="clientSearch" ng-model="search.client.name">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label for="quantitySearch">Поиск по количеству: </label>
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <br>
                 <!-- Table -->
                 <table class="table table-hover">
                     <thead>
@@ -27,7 +61,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="b in vm.buys"
+                    <tr ng-repeat="b in vm.buys | filter:search:strict"
                         class="{{b.completed == false && b.goods.quantity === 0 ? 'danger' : (
                         (b.completed == false && b.goods.quantity != 0) ||
                         (b.completed == true && b.goods.quantity === 0) ? 'warning' : 'success'

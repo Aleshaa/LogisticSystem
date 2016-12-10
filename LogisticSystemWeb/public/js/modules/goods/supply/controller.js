@@ -6,7 +6,8 @@ module.exports = [
     'goodsService',
     'supplierService',
     'addressService',
-    function ($scope, supplyService, goodsService, supplierService, addressService) {
+    'flashService',
+    function ($scope, supplyService, goodsService, supplierService, addressService, flashService) {
         var vm = this;
 
         vm.supplies = [];
@@ -64,6 +65,8 @@ module.exports = [
                         loadAllSupplies();
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log(response.message)
                     }
                 });
@@ -88,6 +91,8 @@ module.exports = [
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log(response.message)
                     }
                 });
@@ -102,6 +107,8 @@ module.exports = [
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log(response.message)
                     }
                 });

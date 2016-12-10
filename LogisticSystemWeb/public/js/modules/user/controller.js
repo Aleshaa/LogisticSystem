@@ -3,11 +3,13 @@
 module.exports = [
     '$scope',
     'userService',
-    '$rootScope',
-    function ($scope, userService, $rootScope) {
+    'flashService',
+
+    function ($scope, userService, flashService) {
         var vm = this;
 
         vm.user = null;
+        vm.dataLoading = true;
         vm.allUsers = [];
         vm.remove = remove;
 
@@ -15,14 +17,20 @@ module.exports = [
 
         function initController() {
             loadAllUsers();
+            vm.dataLoading = false;
         }
 
         function remove(idUser) {
+            vm.dataLoading = true;
             userService.Delete(idUser)
                 .then(function (response) {
                     if (response.success) {
                         loadAllUsers();
+                        flashService.Success(response.message);
+                        vm.dataLoading = false;
                     } else {
+                        flashService.Error(response.message);
+                        vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
                 });

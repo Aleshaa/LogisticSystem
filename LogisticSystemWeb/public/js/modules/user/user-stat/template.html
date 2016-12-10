@@ -1,13 +1,23 @@
-<div class="container" ng-if="vm.isAdmin()" align="center" style="margin-top:70px">
+<div class="container" ng-if="vm.isAdmin()" style="margin-top:70px">
     <div id="wrapper" class="toggled">
         <div id="page-content-wrapper">
-            <div class="container-fluid">
-                <div class="row">
+            <ul class="breadcrumb">
+                <li><a href="#/users">Пользователи</a></li>
+                <li class="active">Статистика</li>
+            </ul>
+            <div class="container-fluid" align="center">
+                <div ng-if="!vm.dataLoading" class="row">
                     <div class="col-lg-5">
                         <div google-chart chart="vm.amountOfPaymentsChart" style="height:600px; width:100%;"></div>
                     </div>
                     <div class="col-lg-5">
                         <div google-chart chart="vm.countOfPaymentsChart" style="height:600px; width:100%;"></div>
+                    </div>
+                </div>
+                <div ng-if="vm.dataLoading" class="row vertical-center-row">
+                    <div class="text-center col-md-4 col-md-offset-4">
+                        <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+                        <span class="sr-only">Loading...</span>
                     </div>
                 </div>
             </div>
@@ -16,8 +26,12 @@
 </div>
 <div class="container" ng-if="!vm.isAdmin()">
     <div class="jumbotron">
+        <ul class="breadcrumb">
+            <li><a href="#/user-profile">Личный кабинет</a></li>
+            <li class="active">Статистика</li>
+        </ul>
         <h1>Ваша статистика:</h1>
-        <h3>Потраченнные деньги: {{vm.userData.amountOfPayments}}</h3>
+        <h3>Потраченнные деньги: {{vm.userData.amountOfPayments}}$</h3>
         <h3>Количество совершенных покупок: {{vm.userData.countOfPayments}}</h3>
     </div>
 </div>
