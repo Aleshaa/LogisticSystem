@@ -60,7 +60,8 @@ module.exports = [
         function handleSuccess(res) {
             return {
                 success: true,
-                data: res.data
+                data: res.data,
+                message: "Операция выполнена успешно!"
             };
         }
 

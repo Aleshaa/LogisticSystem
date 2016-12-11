@@ -24,7 +24,15 @@ module.exports = [
         function getCurrentUser() {
             userService.getCurrentUser()
                 .then(function (user) {
-                    $scope.user = user.data;
+                    if(user.success)
+                        $scope.user = user.data;
+                    else {
+                        $scope.authStatus = false;
+                        flag = false;
+                        getCurrentUser();
+                        getCountOfNonConfirm();
+                        authService.ClearCredentials();
+                    }
                 });
         }
 

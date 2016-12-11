@@ -67,7 +67,7 @@ public class ScheduleService {
             } else
                 LOGGER.info("Еще не настало время");
         }
-        LOGGER.info("Method executed at every 10 minutes. Current time is :: " + new Date());
+        LOGGER.info("Проверка осуществляется каждый чак. Текущее время :: " + new Date());
     }
 
 }
