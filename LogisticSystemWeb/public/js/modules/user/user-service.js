@@ -17,6 +17,7 @@ module.exports = [
         service.create = create;
         service.update = update;
         service.Delete = Delete;
+        service.changePassword = changePassword;
 
         return service;
 
@@ -36,7 +37,11 @@ module.exports = [
         }
 
         function update(user) {
-            return $http.put('/api/users/' + user.id, user).then(handleSuccess, handleError('Error updating user'));
+            return $http.put(REST_SERVICE_URI + 'rest/update/user/' + user.idUser, user).then(handleSuccess, handleError('Error updating user'));
+        }
+
+        function changePassword(user, password) {
+            return $http.put(REST_SERVICE_URI + 'rest/update/user/password/' + user.idUser, password).then(handleSuccess, handleError('Error updating user'));
         }
 
         function Delete(id) {
@@ -46,7 +51,8 @@ module.exports = [
         function handleSuccess(res) {
             return {
                 success: true,
-                data: res.data
+                data: res.data,
+                message: "Операция выполнена успешно!"
             };
         }
 
