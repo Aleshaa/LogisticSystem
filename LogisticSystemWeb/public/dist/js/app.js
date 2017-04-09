@@ -94,9 +94,9 @@ module.exports = [
 
         var userRole = "";
         var authStatus = true;
-        service.Login = Login;
-        service.SetCredentials = SetCredentials;
-        service.ClearCredentials = ClearCredentials;
+        service.login = login;
+        service.setCredentials = setCredentials;
+        service.clearCredentials = clearCredentials;
         service.isAuth = isAuth;
         service.getAuthUser = getAuthUser;
         service.getCurrentUser = getCurrentUser;
@@ -104,25 +104,21 @@ module.exports = [
 
         return service;
 
-        function Login(username, password, callback) {
+        function login(username, password, callback) {
             authStatus = false;
-            SetCredentials(username, password);
+            setCredentials(username, password);
             $http.get(REST_SERVICE_URI + '/rest/authenticate', {})
                 .success(function (response) {
                     userRole = response.role.nameRole;
-                    $rootScope.globals = {};
-                    localStorageService.remove('globals');
-                    $http.defaults.headers.common.Authorization = 'Basic';
-                    authStatus = true;
                     response = {success: true};
+                    authStatus = true;
+                    clearCredentials();
+                    console.info('success', response);
                     callback(response);
                 })
                 .error(function (response, status) {
                     response = {success: false, message: 'Имя пользователя или пароль неверны'};
-                    $rootScope.globals = {};
-                    localStorageService.remove('globals');
-                    console.log("ОЧИСТИЛИ ГЛОБАЛС");
-                    $http.defaults.headers.common.Authorization = 'Basic';
+                    clearCredentials();
                     console.error('error', status, response);
                     callback(response);
                 });
@@ -135,13 +131,13 @@ module.exports = [
                     if (response.success) {
                         return response.data;
                     } else {
-                        console.log("Что-то пошло не так");
+                        console.log("Error on getting current user");
                         return {};
                     }
                 });
         }
 
-        function SetCredentials(username, password) {
+        function setCredentials(username, password) {
             var encodedString = btoa(username + ':' + password);
 
 
@@ -169,12 +165,13 @@ module.exports = [
             var currentUser = {
                 role: ""
             };
-            if (localStorageService.get('globals'))
+            if (localStorageService.get('globals')) {
                 currentUser = localStorageService.get('globals').currentUser;
+            }
             return authRoles.indexOf(currentUser.role) != -1 || authRoles == [];
         }
 
-        function ClearCredentials() {
+        function clearCredentials() {
             $rootScope.globals = {};
             localStorageService.remove('globals');
             $http.defaults.headers.common.Authorization = 'Basic';
@@ -204,7 +201,9 @@ module.exports = [
         var service = {};
 
         service.Success = Success;
-        service.Error = Error;
+        service.error = error;
+        service.showLoading = showLoading;
+        service.hideLoading = hideLoading;
 
         initService();
 
@@ -236,12 +235,22 @@ module.exports = [
             };
         }
 
-        function Error(message, keepAfterLocationChange) {
+        function error(message, keepAfterLocationChange) {
             $rootScope.flash = {
                 message: message,
                 type: 'error',
                 keepAfterLocationChange: keepAfterLocationChange
             };
+        }
+
+        function showLoading() {
+            $("#container").hide();
+            $("#loading").show();
+        }
+
+        function hideLoading() {
+            $("#container").show();
+            $("#loading").hide();
         }
     }
 ];
@@ -546,7 +555,8 @@ module.exports = function () {
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -566,23 +576,27 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/addresses').then(handleSuccess,
-                handleError('Ошибка при получении всех адресов'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/addresses')
+                .then(handleSuccess, handleError('Ошибка при получении всех адресов'));
         }
 
         function getAllStores() {
+            flashService.showLoading();
             return $http.get(REST_SERVICE_URI + 'rest/get/stores')
                 .then(handleSuccess, handleError('Ошибка при получении всех складов'));
         }
 
         function getAllAddresses() {
+            flashService.showLoading();
             return $http.get(REST_SERVICE_URI + 'rest/get/addresses/user')
                 .then(handleSuccess, handleError('Ошибка при получении всех складов'));
         }
 
         function getStoresForCurrentGoods(id) {
-            return $http.get(REST_SERVICE_URI + 'rest/get/addresses/cur/goods/' + id).then(handleSuccess,
-                handleError('Ошибка при получении всех адресов для опредленного товара'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/addresses/cur/goods/' + id)
+                .then(handleSuccess, handleError('Ошибка при получении всех адресов для опредленного товара'));
         }
 
         function create(newAddress, idUser) {
@@ -698,7 +712,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -715,7 +729,7 @@ module.exports = [
                         vm.creationForm = false;
                         vm.newStore = {};
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -732,7 +746,7 @@ module.exports = [
                         vm.editionForm = false;
                         vm.newStore = {};
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -743,6 +757,7 @@ module.exports = [
             addressService.getAllAddresses()
                 .then(function (stores) {
                     vm.stores = stores.data;
+                    flashService.hideLoading();
                 });
         }
 
@@ -769,7 +784,7 @@ angular
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./addresses-service":12,"./config":13,"./controller":14}],16:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-12">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Склады:</div>\n                <div class="custom-search">\n                    <label for="countrySearch">Поиск по стране:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="countrySearch" ng-model="search.country">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="citySearch">Поиск по городу:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="citySearch" ng-model="search.city">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="streetSearch">Поиск по улице: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="streetSearch" ng-model="search.street">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Страна</th>\n                        <th>Город</th>\n                        <th>Адрес</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="s in vm.stores | filter:search:strict">\n                        <td>{{s.country}}</td>\n                        <td>{{s.city}}</td>\n                        <td>{{s.street}}, {{s.number}}</td>\n                        <td>\n                            <button ng-click="vm.showEditForm(s)" ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-click="vm.remove(s.idAddress)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"\n                    data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.country.$dirty && form.country.$error.required }">\n                        <label for="country">Страна</label>\n                        <input type="text" name="country" id="country" class="form-control"\n                               ng-model="vm.newStore.country"\n                               required/>\n                        <span ng-show="form.country.$dirty && form.country.$error.required" class="help-block">Страна - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.city.$dirty && form.city.$error.required }">\n                        <label for="country">Город</label>\n                        <input type="text" name="city" id="city" class="form-control" ng-model="vm.newStore.city"\n                               required/>\n                        <span ng-show="form.city.$dirty && form.city.$error.required"\n                              class="help-block">Город - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.street.$dirty && form.street.$error.required }">\n                        <label for="country">Улица</label>\n                        <input type="text" name="street" id="street" class="form-control"\n                               ng-model="vm.newStore.street" required/>\n                        <span ng-show="form.street.$dirty && form.street.$error.required" class="help-block">Улицы - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.number.$dirty && form.number.$error.required }">\n                        <label for="country">Номер</label>\n                        <input type="number" name="number" id="number" class="form-control"\n                               ng-model="vm.newStore.number"\n                               required/>\n                        <span ng-show="form.number.$dirty && form.number.$error.required"\n                              class="help-block">Номер - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-12">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Склады:</div>\n                <div class="custom-search">\n                    <label for="countrySearch">Поиск по стране:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="countrySearch" ng-model="search.country">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="citySearch">Поиск по городу:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="citySearch" ng-model="search.city">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="streetSearch">Поиск по улице: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="streetSearch" ng-model="search.street">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Страна</th>\n                        <th>Город</th>\n                        <th>Адрес</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="s in vm.stores | filter:search:strict">\n                        <td>{{s.country}}</td>\n                        <td>{{s.city}}</td>\n                        <td>{{s.street}}, {{s.number}}</td>\n                        <td>\n                            <button ng-click="vm.showEditForm(s)" ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-click="vm.remove(s.idAddress)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"\n                    data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.country.$dirty && form.country.$error.required }">\n                        <label for="country">Страна</label>\n                        <input type="text" name="country" id="country" class="form-control"\n                               ng-model="vm.newStore.country"\n                               required/>\n                        <span ng-show="form.country.$dirty && form.country.$error.required" class="help-block">Страна - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.city.$dirty && form.city.$error.required }">\n                        <label for="country">Город</label>\n                        <input type="text" name="city" id="city" class="form-control" ng-model="vm.newStore.city"\n                               required/>\n                        <span ng-show="form.city.$dirty && form.city.$error.required"\n                              class="help-block">Город - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.street.$dirty && form.street.$error.required }">\n                        <label for="country">Улица</label>\n                        <input type="text" name="street" id="street" class="form-control"\n                               ng-model="vm.newStore.street" required/>\n                        <span ng-show="form.street.$dirty && form.street.$error.required" class="help-block">Улицы - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.number.$dirty && form.number.$error.required }">\n                        <label for="country">Номер</label>\n                        <input type="number" name="number" id="number" class="form-control"\n                               ng-model="vm.newStore.number"\n                               required/>\n                        <span ng-show="form.number.$dirty && form.number.$error.required"\n                              class="help-block">Номер - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
 },{}],17:[function(require,module,exports){
 'use strict';
 
@@ -803,6 +818,8 @@ module.exports = [
     function ($scope, goodsService, addressService, authService, supplierService, supplyService, flashService) {
         var vm = this;
 
+        var counter;
+        
         vm.goods = [];
         vm.suppliers = [];
         vm.addresses = [];
@@ -836,6 +853,7 @@ module.exports = [
         }
 
         function initController() {
+            counter = 0;
             loadAllGoods();
             loadAllSuppliers();
             loadAllAddresses();
@@ -873,7 +891,7 @@ module.exports = [
                         loadAllGoods();
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -891,7 +909,7 @@ module.exports = [
                         vm.newGoods = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -908,7 +926,7 @@ module.exports = [
                         vm.newGoods = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -930,6 +948,10 @@ module.exports = [
                 .then(function (addresses) {
                     vm.goods[i].addresses = [];
                     vm.goods[i].addresses = addresses.data;
+                    counter++;
+                    if (vm.addresses.length > 0 && counter == vm.addresses.length) {
+                        flashService.hideLoading();
+                    }
                 });
         }
 
@@ -980,7 +1002,8 @@ module.exports = [
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -998,8 +1021,9 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/goods').then(handleSuccess,
-                handleError('Ошибка при получении всех товаров'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/goods')
+                .then(handleSuccess, handleError('Ошибка при получении всех товаров'));
         }
 
         function create(newGoods) {
@@ -1268,7 +1292,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -1285,7 +1309,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -1302,7 +1326,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -1313,6 +1337,7 @@ module.exports = [
             supplierService.getAll()
                 .then(function (suppliers) {
                     vm.suppliers = suppliers.data;
+                    flashService.hideLoading();
                 });
         }
     }
@@ -1337,7 +1362,8 @@ angular
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -1354,8 +1380,9 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/suppliers').then(handleSuccess,
-                handleError('Ошибка при получении всех поставщиков'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/suppliers')
+                .then(handleSuccess, handleError('Ошибка при получении всех поставщиков'));
         }
 
         function create(newSupplier) {
@@ -1390,7 +1417,7 @@ module.exports = [
     }
 ];
 },{}],29:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-12">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li><a href="#/goods">Товары</a></li>\n                <li class="active">Поставщики</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Поставщики:</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по имени:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="emailSearch">Поиск по email:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="emailSearch" ng-model="search.email">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="phoneSearch">Поиск по номеру телефона: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="phoneSearch" ng-model="search.phone">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Имя</th>\n                        <th>Email</th>\n                        <th>Телефон</th>\n                        <th>О поставщике</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="s in vm.suppliers | filter:search:strict">\n                        <td>{{s.name}}</td>\n                        <td>{{s.email}}</td>\n                        <td>{{s.phone}}</td>\n                        <td>{{s.about}}</td>\n                        <td>\n                            <button ng-click="vm.showEditForm(s)" ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-click="vm.remove(s.idSupplier)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"\n                    data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.name.$dirty && form.name.$error.required }">\n                        <label for="name">Название</label>\n                        <input type="text" name="name" id="name" class="form-control" ng-model="vm.newSupplier.name"\n                               required/>\n                        <span ng-show="form.name.$dirty && form.name.$error.required" class="help-block">Название - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.email.$dirty && form.email.$error.required }">\n                        <label for="email">Email</label>\n                        <input type="text" name="email" id="email" class="form-control" ng-model="vm.newSupplier.email"\n                               required/>\n                        <span ng-show="form.email.$dirty && form.email.$error.required"\n                              class="help-block">Email - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.phone.$dirty && form.phone.$error.required }">\n                        <label for="phone">Телефона</label>\n                        <input type="text" name="phone" id="phone" class="form-control"\n                               ng-model="vm.newSupplier.phone" required/>\n                        <span ng-show="form.phone.$dirty && form.phone.$error.required" class="help-block">Телефон - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.about.$dirty && form.about.$error.required }">\n                        <label for="about">О поставщике</label>\n                        <input type="text" name="about" id="about" class="form-control" ng-model="vm.newSupplier.about"\n                               required/>\n                        <span ng-show="form.about.$dirty && form.about.$error.required"\n                              class="help-block">О поставщике - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-12">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li><a href="#/goods">Товары</a></li>\n                <li class="active">Поставщики</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Поставщики:</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по имени:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="emailSearch">Поиск по email:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="emailSearch" ng-model="search.email">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="phoneSearch">Поиск по номеру телефона: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="phoneSearch" ng-model="search.phone">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Имя</th>\n                        <th>Email</th>\n                        <th>Телефон</th>\n                        <th>О поставщике</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="s in vm.suppliers | filter:search:strict">\n                        <td>{{s.name}}</td>\n                        <td>{{s.email}}</td>\n                        <td>{{s.phone}}</td>\n                        <td>{{s.about}}</td>\n                        <td>\n                            <button ng-click="vm.showEditForm(s)" ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-click="vm.remove(s.idSupplier)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"\n                    data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.name.$dirty && form.name.$error.required }">\n                        <label for="name">Название</label>\n                        <input type="text" name="name" id="name" class="form-control" ng-model="vm.newSupplier.name"\n                               required/>\n                        <span ng-show="form.name.$dirty && form.name.$error.required" class="help-block">Название - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.email.$dirty && form.email.$error.required }">\n                        <label for="email">Email</label>\n                        <input type="text" name="email" id="email" class="form-control" ng-model="vm.newSupplier.email"\n                               required/>\n                        <span ng-show="form.email.$dirty && form.email.$error.required"\n                              class="help-block">Email - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.phone.$dirty && form.phone.$error.required }">\n                        <label for="phone">Телефона</label>\n                        <input type="text" name="phone" id="phone" class="form-control"\n                               ng-model="vm.newSupplier.phone" required/>\n                        <span ng-show="form.phone.$dirty && form.phone.$error.required" class="help-block">Телефон - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.about.$dirty && form.about.$error.required }">\n                        <label for="about">О поставщике</label>\n                        <input type="text" name="about" id="about" class="form-control" ng-model="vm.newSupplier.about"\n                               required/>\n                        <span ng-show="form.about.$dirty && form.about.$error.required"\n                              class="help-block">О поставщике - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
 },{}],30:[function(require,module,exports){
 'use strict';
 
@@ -1478,7 +1505,7 @@ module.exports = [
                         loadAllSupplies();
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -1504,7 +1531,7 @@ module.exports = [
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -1520,7 +1547,7 @@ module.exports = [
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -1545,6 +1572,7 @@ module.exports = [
             supplierService.getAll()
                 .then(function (suppliers) {
                     vm.suppliers = suppliers.data;
+                    flashService.hideLoading();
                 });
         }
 
@@ -1576,7 +1604,8 @@ angular
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -1593,8 +1622,9 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/supplies').then(handleSuccess,
-                handleError('Ошибка при получении всех поставок'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/supplies')
+                .then(handleSuccess, handleError('Ошибка при получении всех поставок'));
         }
 
         function create(newSupply, idSupplier, idGoods, idAddress) {
@@ -1632,9 +1662,9 @@ module.exports = [
     }
 ];
 },{}],34:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a href="#">\n                    <i class="fa fa-line-chart" aria-hidden="true"></i>\n                    Статистики</a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li><a href="#/goods">Товары</a></li>\n                <li class="active">Поставки</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Поставки:</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по названию:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="supSearch">Поиск по поставщику:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="supSearch" ng-model="search.supplier.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Название товара</th>\n                        <th>Поставщик</th>\n                        <th>Количество</th>\n                        <th>Дата</th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="s in vm.supplies | filter:search:strict">\n                        <td>{{s.goods.name}}</td>\n                        <td>{{s.supplier.name}}</td>\n                        <td>{{s.quantity}}</td>\n                        <td>{{s.date}}</td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"\n                    data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.goods.$dirty && form.goods.$error.required }">\n                        <label for="goods">Товар</label>\n                        <select class="form-control" id="goods" name="goods" ng-model="vm.newSupply.goods" required>\n                            <option ng-repeat="g in vm.goods" value="{{g.idGoods}}">{{g.name}}</option>\n                        </select>\n                        <span ng-show="form.goods.$dirty && form.goods.$error.required" class="help-block">Товар - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Поставщик</label>\n                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"\n                                required>\n                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>\n                        </select>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Склад</label>\n                        <br/>\n                        <label ng-repeat="a in vm.addresses" class="radio-inline">\n                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">\n                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}\n                        </label>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantity">Количество</label>\n                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"\n                               ng-model="vm.newSupply.quantity" required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a href="#">\n                    <i class="fa fa-line-chart" aria-hidden="true"></i>\n                    Статистики</a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li><a href="#/goods">Товары</a></li>\n                <li class="active">Поставки</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Поставки:</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по названию:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="supSearch">Поиск по поставщику:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="supSearch" ng-model="search.supplier.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Название товара</th>\n                        <th>Поставщик</th>\n                        <th>Количество</th>\n                        <th>Дата</th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="s in vm.supplies | filter:search:strict">\n                        <td>{{s.goods.name}}</td>\n                        <td>{{s.supplier.name}}</td>\n                        <td>{{s.quantity}}</td>\n                        <td>{{s.date}}</td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg" data-toggle="modal"\n                    data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.goods.$dirty && form.goods.$error.required }">\n                        <label for="goods">Товар</label>\n                        <select class="form-control" id="goods" name="goods" ng-model="vm.newSupply.goods" required>\n                            <option ng-repeat="g in vm.goods" value="{{g.idGoods}}">{{g.name}}</option>\n                        </select>\n                        <span ng-show="form.goods.$dirty && form.goods.$error.required" class="help-block">Товар - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Поставщик</label>\n                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"\n                                required>\n                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>\n                        </select>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Склад</label>\n                        <br/>\n                        <label ng-repeat="a in vm.addresses" class="radio-inline">\n                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">\n                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}\n                        </label>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantity">Количество</label>\n                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"\n                               ng-model="vm.newSupply.quantity" required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
 },{}],35:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a ng-if="vm.isAdmin()" href="#/suppliers"><i class="fa fa-truck" aria-hidden="true"></i>Поставщики</a>\n                </li>\n                <li><a ng-if="vm.isAdmin()" href="#/supplies"><i class="fa fa-download" aria-hidden="true"></i>Поставки</a>\n                </li>\n                <li><a href="#/goods-stat"><i class="fa fa-pie-chart" aria-hidden="true"></i>Статистики</a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li class="active">Товары</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Доступные товары</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по названию:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="priceSearch">Поиск по цене: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="priceSearch" ng-model="search.price">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Название</th>\n                        <th>Количество</th>\n                        <th>Цена</th>\n                        <th>О продукте</th>\n                        <th>Склады</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="g in vm.goods | filter:search:strict" class="{{g.quantity > 0 ? \'\' : \'danger\'}}">\n                        <td>{{g.name}}</td>\n                        <td>{{g.quantity}}</td>\n                        <td>{{g.price}}</td>\n                        <td>{{g.about}}</td>\n                        <td>\n                            <ul>\n                                <li ng-repeat="address in g.addresses">\n                                    {{address.country}}, {{address.city}}, {{address.street}} {{address.number}}\n                                </li>\n                            </ul>\n                        </td>\n                        <td>\n                            <button ng-if="vm.isAdmin()"\n                                    ng-click="vm.showEditForm(g)"\n                                    ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-if="vm.isAdmin()"\n                                    ng-click="vm.remove(g.idGoods)"\n                                    type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                            <button ng-if="g.quantity == 0 && vm.isAdmin()"\n                                    ng-click="vm.showOrderForm(g)"\n                                    ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#orderSupply">\n                                <span class="glyphicon glyphicon-download"></span> Заказать товар\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-if="vm.isAdmin()"\n                    ng-click="vm.showCreationForm()"\n                    ctype="button" class="btn btn-info btn-lg"\n                    data-toggle="modal" data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.name.$dirty && form.name.$error.required }">\n                        <label for="name">Название товара</label>\n                        <input type="text" name="name" id="name" class="form-control" ng-model="vm.newGoods.name"\n                               required/>\n                        <span ng-show="form.name.$dirty && form.name.$error.required" class="help-block">Название товара - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.price.$dirty && form.price.$error.required }">\n                        <label for="name">Цена</label>\n                        <input type="number" name="price" id="price" class="form-control" ng-model="vm.newGoods.price"\n                               required/>\n                        <span ng-show="form.price.$dirty && form.price.$error.required"\n                              class="help-block">Цена - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.about.$dirty && form.about.$error.required }">\n                        <label for="name">Коротко о товаре:</label>\n                        <input type="text" name="about" id="about" class="form-control" ng-model="vm.newGoods.about"\n                               required/>\n                        <span ng-show="form.about.$dirty && form.about.$error.required"\n                              class="help-block">О вас - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n    <div class="modal fade" id="orderSupply" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">Заказать</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Поставщик</label>\n                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"\n                                required>\n                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>\n                        </select>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Склад</label>\n                        <br/>\n                        <label ng-repeat="a in vm.addresses" class="radio-inline">\n                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">\n                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}\n                        </label>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantity">Количество</label>\n                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"\n                               ng-model="vm.newSupply.quantity" required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a ng-if="vm.isAdmin()" href="#/suppliers"><i class="fa fa-truck" aria-hidden="true"></i>Поставщики</a>\n                </li>\n                <li><a ng-if="vm.isAdmin()" href="#/supplies"><i class="fa fa-download" aria-hidden="true"></i>Поставки</a>\n                </li>\n                <li><a href="#/goods-stat"><i class="fa fa-pie-chart" aria-hidden="true"></i>Статистики</a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li class="active">Товары</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Доступные товары</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по названию:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="priceSearch">Поиск по цене: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="priceSearch" ng-model="search.price">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Название</th>\n                        <th>Количество</th>\n                        <th>Цена</th>\n                        <th>О продукте</th>\n                        <th>Склады</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="g in vm.goods | filter:search:strict" class="{{g.quantity > 0 ? \'\' : \'danger\'}}">\n                        <td>{{g.name}}</td>\n                        <td>{{g.quantity}}</td>\n                        <td>{{g.price}}</td>\n                        <td>{{g.about}}</td>\n                        <td>\n                            <ul>\n                                <li ng-repeat="address in g.addresses">\n                                    {{address.country}}, {{address.city}}, {{address.street}} {{address.number}}\n                                </li>\n                            </ul>\n                        </td>\n                        <td>\n                            <button ng-if="vm.isAdmin()"\n                                    ng-click="vm.showEditForm(g)"\n                                    ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-if="vm.isAdmin()"\n                                    ng-click="vm.remove(g.idGoods)"\n                                    type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                            <button ng-if="g.quantity == 0 && vm.isAdmin()"\n                                    ng-click="vm.showOrderForm(g)"\n                                    ctype="button" class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#orderSupply">\n                                <span class="glyphicon glyphicon-download"></span> Заказать товар\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-if="vm.isAdmin()"\n                    ng-click="vm.showCreationForm()"\n                    ctype="button" class="btn btn-info btn-lg"\n                    data-toggle="modal" data-target="#myModal">\n                Добавить\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.name.$dirty && form.name.$error.required }">\n                        <label for="name">Название товара</label>\n                        <input type="text" name="name" id="name" class="form-control" ng-model="vm.newGoods.name"\n                               required/>\n                        <span ng-show="form.name.$dirty && form.name.$error.required" class="help-block">Название товара - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.price.$dirty && form.price.$error.required }">\n                        <label for="name">Цена</label>\n                        <input type="number" name="price" id="price" class="form-control" ng-model="vm.newGoods.price"\n                               required/>\n                        <span ng-show="form.price.$dirty && form.price.$error.required"\n                              class="help-block">Цена - обязательное поле</span>\n                    </div>\n                    <div class="form-group" ng-class="{ \'has-error\': form.about.$dirty && form.about.$error.required }">\n                        <label for="name">Коротко о товаре:</label>\n                        <input type="text" name="about" id="about" class="form-control" ng-model="vm.newGoods.about"\n                               required/>\n                        <span ng-show="form.about.$dirty && form.about.$error.required"\n                              class="help-block">О вас - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n    <div class="modal fade" id="orderSupply" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">Заказать</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Поставщик</label>\n                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"\n                                required>\n                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>\n                        </select>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Склад</label>\n                        <br/>\n                        <label ng-repeat="a in vm.addresses" class="radio-inline">\n                            <input value="{{a.idAddress}}" type="radio" ng-model="vm.newSupply.address">\n                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}\n                        </label>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantity">Количество</label>\n                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"\n                               ng-model="vm.newSupply.quantity" required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
 },{}],36:[function(require,module,exports){
 'use strict';
 
@@ -1661,11 +1691,11 @@ module.exports = [
 module.exports = [
     '$scope',
     'userService',
-    function ($scope, UserService) {
+    'flashService',
+    function ($scope, UserService, flashService) {
         var vm = this;
 
         vm.user = null;
-        vm.allUsers = [];
 
         initController();
 
@@ -1677,6 +1707,7 @@ module.exports = [
             UserService.getCurrentUser()
                 .then(function (user) {
                     vm.user = user.data;
+                    flashService.hideLoading();
                 });
         }
     }
@@ -1697,23 +1728,29 @@ angular
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../run":66,"../statistics-service":67,"./config":36,"./controller":37,"./top-menu/directive":41}],39:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:50px">\n    <h1>Добро пожаловать {{vm.user.name}}!</h1>\n    <div class="row">\n        <div class="col-md-4">\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n        </div>\n        <div class="col-md-4">\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n        </div>\n        <div class="col-md-4">\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:50px">\n    <h1>Добро пожаловать {{vm.user.name}}!</h1>\n    <div class="row">\n        <div class="col-md-4">\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n        </div>\n        <div class="col-md-4">\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n        </div>\n        <div class="col-md-4">\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n            <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page\n                scroll.</p>\n        </div>\n    </div>\n</div>\n';
 },{}],40:[function(require,module,exports){
 'use strict';
 
 module.exports = [
-    '$scope',
-    '$state',
     'authService',
     'userService',
     'purchaseService',
-    function ($scope, $state, authService, userService, purchaseService) {
+    function (authService, userService, purchaseService) {
 
-        $scope.isCollapsed = true;
-        $scope.authStatus = false;
+        var vm = this;
         var flag = false;
-        $scope.countNonConfirmPurchases = 0;
-        $scope.user = {};
+
+        vm.refresh = refresh;
+        vm.isAuth = isAuth;
+        vm.isAdmin = isAdmin;
+        vm.isUser = isUser;
+        vm.logout = logout;
+
+        vm.isCollapsed = true;
+        vm.authStatus = false;
+        vm.countNonConfirmPurchases = 0;
+        vm.user = {};
 
         setTimeout(initController(), 1000);
 
@@ -1723,16 +1760,18 @@ module.exports = [
         }
 
         function getCurrentUser() {
+            console.log("Get current user function called");
             userService.getCurrentUser()
                 .then(function (user) {
-                    if(user.success)
-                        $scope.user = user.data;
+                    if (user.success) {
+                        vm.user = user.data;
+                        console.log("Current user: " + user.data);
+                    }
                     else {
-                        $scope.authStatus = false;
+                        vm.authStatus = false;
                         flag = false;
-                        getCurrentUser();
-                        getCountOfNonConfirm();
-                        authService.ClearCredentials();
+                        console.log(user.message);
+                        authService.clearCredentials();
                     }
                 });
         }
@@ -1741,45 +1780,43 @@ module.exports = [
             purchaseService.getCountOfNonConfirm()
                 .then(function (count) {
                     if (count.success) {
-                        $scope.countNonConfirmPurchases = count.data;
+                        vm.countNonConfirmPurchases = count.data;
                     } else {
                         console.log(count.message);
                     }
                 });
         }
 
-        $scope.refresh = function () {
+        function refresh() {
             getCurrentUser();
             getCountOfNonConfirm();
-        };
+        }
 
-        $scope.isAuth = function () {
-            if (!$scope.authStatus) {
-                $scope.authStatus = authService.isAuth();
+        function isAuth() {
+            if (!vm.authStatus) {
+                vm.authStatus = authService.isAuth();
             }
-            if ($scope.authStatus && !flag) {
+            if (vm.authStatus && !flag) {
                 getCurrentUser();
                 getCountOfNonConfirm();
                 flag = true;
             }
-            return $scope.authStatus;
-        };
+            return vm.authStatus;
+        }
 
-        $scope.isAdmin = function () {
+        function isAdmin() {
             return authService.checkRole(['ADMIN']);
-        };
+        }
 
-        $scope.isUser = function () {
+        function isUser() {
             return authService.checkRole(['USER']);
-        };
+        }
 
-        $scope.logout = function () {
-            $scope.authStatus = false;
+        function logout() {
+            vm.authStatus = false;
             flag = false;
-            getCurrentUser();
-            getCountOfNonConfirm();
-            return authService.ClearCredentials();
-        };
+            return authService.clearCredentials();
+        }
 
     }
 ];
@@ -1793,13 +1830,14 @@ module.exports = [function () {
         replace: true,
         scope: true,
         controller: require('./controller'),
+        controllerAs: 'vm',
         template: require('./template.html')
     };
 }
 ];
 
 },{"./controller":40,"./template.html":42}],42:[function(require,module,exports){
-module.exports = '<div ng-show="isAuth()" class="container-fluid">\n    <nav class="navbar navbar-inverse navbar-fixed-top">\n        <div class="navbar-header">\n            <button type="button"\n                    ng-click="isCollapsed = !isCollapsed"\n                    class="navbar-toggle collapsed">\n                <span class="sr-only">Toggle navigation</span>\n                <span class="icon-bar"></span>\n                <span class="icon-bar"></span>\n                <span class="icon-bar"></span>\n            </button>\n            <a class="navbar-brand">LogisticSystem</a>\n        </div>\n        <div id="navbar"\n             class="navbar-collapse collapse"\n             ng-class="{\'text-align-center\': !isCollapsed}"\n             uib-collapse="isCollapsed">\n            <ul class="nav navbar-nav navbar-right margin-right-5">\n                <li>\n                    <a ng-click="refresh()" ng-if="isAdmin()" href="#/users">\n                        <i class="fa fa-users" aria-hidden="true"></i> Пользователи\n                    </a>\n                </li>\n                <li><a ng-click="refresh()" href="#/goods"><i class="fa fa-shopping-bag"\n                                                              aria-hidden="true"></i>Товары</a></li>\n                <li><a ng-click="refresh()" ng-if="isAdmin()" href="#/addresses"><i class="fa fa-building-o"\n                                                                                    aria-hidden="true"></i>Склады</a>\n                </li>\n                <li><a ng-click="refresh()" ng-if="isUser()" href="#/addresses"><i class="fa fa-building-o"\n                                                                                   aria-hidden="true"></i>Магазины</a>\n                </li>\n                <li>\n                    <a ng-click="refresh()" href="#/purchases">\n                        <i class="fa fa-shopping-cart" aria-hidden="true"></i> Заказы на поставку\n                        <span ng-if="countNonConfirmPurchases > 0" class="badge">{{countNonConfirmPurchases}}</span>\n                    </a>\n                </li>\n                <li ng-click="logout()">\n                    <a ng-if="isAdmin()" href="#/logout" class="cursor-pointer">\n                        <span class="glyphicon glyphicon-off"></span> Выйти\n                    </a>\n                </li>\n                <li ng-if="isUser()" class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"\n                       aria-expanded="false">{{user.name}}<span class="caret"></span></a>\n                    <ul class="dropdown-menu">\n                        <li><a href="#/user-profile">\n                            <i class="fa fa-user-o" aria-hidden="true"></i> Профиль</a></li>\n                        <li role="separator" class="divider"></li>\n                        <li ng-click="logout()"><a href="#/logout"><span class="glyphicon glyphicon-off"></span>\n                            Выйти</a></li>\n                    </ul>\n                </li>\n            </ul>\n        </div>\n    </nav>\n</div>\n';
+    module.exports = '<div id="top" ng-show="vm.isAuth()" class="container-fluid">\n    <nav class="navbar navbar-inverse navbar-fixed-top">\n        <div class="navbar-header">\n            <button type="button"\n                    ng-click="isCollapsed = !vm.isCollapsed"\n                    class="navbar-toggle collapsed">\n                <span class="sr-only">Toggle navigation</span>\n                <span class="icon-bar"></span>\n                <span class="icon-bar"></span>\n                <span class="icon-bar"></span>\n            </button>\n            <a class="navbar-brand">LogisticSystem</a>\n        </div>\n        <div id="navbar"\n             class="navbar-collapse collapse"\n             ng-class="{\'text-align-center\': !vm.isCollapsed}"\n             uib-collapse="isCollapsed">\n            <ul class="nav navbar-nav navbar-right margin-right-5">\n                <li>\n                    <a ng-click="vm.refresh()" ng-if="vm.isAdmin()" href="#/users">\n                        <i class="fa fa-users" aria-hidden="true"></i> Пользователи\n                    </a>\n                </li>\n                <li><a ng-click="vm.refresh()" href="#/goods"><i class="fa fa-shopping-bag"\n                                                              aria-hidden="true"></i>Товары</a></li>\n                <li><a ng-click="vm.refresh()" ng-if="vm.isAdmin()" href="#/addresses"><i class="fa fa-building-o"\n                                                                                    aria-hidden="true"></i>Склады</a>\n                </li>\n                <li><a ng-click="vm.refresh()" ng-if="vm.isUser()" href="#/addresses"><i class="fa fa-building-o"\n                                                                                   aria-hidden="true"></i>Магазины</a>\n                </li>\n                <li>\n                    <a ng-click="vm.refresh()" href="#/purchases">\n                        <i class="fa fa-shopping-cart" aria-hidden="true"></i> Заказы на поставку\n                        <span ng-if="vm.countNonConfirmPurchases > 0" class="badge">{{vm.countNonConfirmPurchases}}</span>\n                    </a>\n                </li>\n                <li ng-click="vm.logout()">\n                    <a ng-if="vm.isAdmin()" href="#/logout" class="cursor-pointer">\n                        <span class="glyphicon glyphicon-off"></span> Выйти\n                    </a>\n                </li>\n                <li ng-if="vm.isUser()" class="dropdown">\n                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"\n                       aria-expanded="false">{{vm.user.name}}<span class="caret"></span></a>\n                    <ul class="dropdown-menu">\n                        <li><a href="#/user-profile">\n                            <i class="fa fa-user-o" aria-hidden="true"></i> Профиль</a></li>\n                        <li role="separator" class="divider"></li>\n                        <li ng-click="vm.logout()"><a href="#/logout"><span class="glyphicon glyphicon-off"></span>\n                            Выйти</a></li>\n                    </ul>\n                </li>\n            </ul>\n        </div>\n    </nav>\n</div>\n';
 },{}],43:[function(require,module,exports){
 'use strict';
 
@@ -1838,19 +1876,19 @@ module.exports = [
         vm.login = login;
 
         (function initController() {
-            authenticationService.ClearCredentials();
+            authenticationService.clearCredentials();
         })();
 
         function login() {
             vm.dataLoading = true;
-            authenticationService.SetCredentials(vm.username, vm.password);
-            authenticationService.Login(vm.username, vm.password, function (response) {
+            //authenticationService.setCredentials(vm.username, vm.password);
+            authenticationService.login(vm.username, vm.password, function (response) {
                 if (response.success) {
-                    authenticationService.SetCredentials(vm.username, vm.password);
+                    authenticationService.setCredentials(vm.username, vm.password);
                     $location.path('/');
                 } else {
-                    authenticationService.ClearCredentials();
-                    flashService.Error(response.message);
+                    authenticationService.clearCredentials();
+                    flashService.error(response.message);
                     vm.dataLoading = false;
                 }
             });
@@ -1882,7 +1920,8 @@ module.exports = '<div ng-class="{ \'alert\': flash, \'alert-success\': flash.ty
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -1901,8 +1940,9 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/buys/user').then(handleSuccess,
-                handleError('Ошибка при получении всех поставок'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/buys/user')
+                .then(handleSuccess, handleError('Ошибка при получении всех поставок'));
         }
 
         function getCountOfNonComplete() {
@@ -2121,7 +2161,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -2137,7 +2177,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -2148,6 +2188,7 @@ module.exports = [
             buyService.getAll()
                 .then(function (buys) {
                     vm.buys = buys.data;
+                    flashService.hideLoading();
                 });
         }
     }
@@ -2171,7 +2212,7 @@ angular
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./buy-service":48,"./buy-stat":51,"./config":53,"./controller":54}],56:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a href="#/buy-stat">\n                    <i class="fa fa-line-chart" aria-hidden="true"></i>\n                    Статистика\n                </a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li><a href="#/purchases">Заказы на поставку</a></li>\n                <li class="active">Поставки клиенту</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Поставки клиенту</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по товару:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="clientSearch">Поиск по клиенту:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="clientSearch" ng-model="search.client.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Товар</th>\n                        <th>Клиент</th>\n                        <th>Количество</th>\n                        <th>Дата</th>\n                        <th>Статус</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="b in vm.buys | filter:search:strict"\n                        class="{{b.completed == false && b.goods.quantity === 0 ? \'danger\' : (\n                        (b.completed == false && b.goods.quantity != 0) ||\n                        (b.completed == true && b.goods.quantity === 0) ? \'warning\' : \'success\'\n                        )}}">\n                        <td>{{b.goods.name}}</td>\n                        <td>{{b.client.name}}</td>\n                        <td>{{b.quantity}}</td>\n                        <td>{{b.date}}</td>\n                        <td>{{b.completed ? "Подтверждено" : "Не подтверждено"}}</td>\n                        <td>\n                            <button ng-if="b.completed == false && b.goods.quantity != 0 && !vm.isAdmin()"\n                                    ng-click="vm.confirm(b.idBuy)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-ok"></span> Подтвердить\n                            </button>\n                            <button ng-if="!b.completed && !vm.isAdmin()" ng-click="vm.remove(b.idBuy)" type="button"\n                                    class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a href="#/buy-stat">\n                    <i class="fa fa-line-chart" aria-hidden="true"></i>\n                    Статистика\n                </a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <ul class="breadcrumb">\n                <li><a href="#/purchases">Заказы на поставку</a></li>\n                <li class="active">Поставки клиенту</li>\n            </ul>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Поставки клиенту</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по товару:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="clientSearch">Поиск по клиенту:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="clientSearch" ng-model="search.client.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Товар</th>\n                        <th>Клиент</th>\n                        <th>Количество</th>\n                        <th>Дата</th>\n                        <th>Статус</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="b in vm.buys | filter:search:strict"\n                        class="{{b.completed == false && b.goods.quantity === 0 ? \'danger\' : (\n                        (b.completed == false && b.goods.quantity != 0) ||\n                        (b.completed == true && b.goods.quantity === 0) ? \'warning\' : \'success\'\n                        )}}">\n                        <td>{{b.goods.name}}</td>\n                        <td>{{b.client.name}}</td>\n                        <td>{{b.quantity}}</td>\n                        <td>{{b.date}}</td>\n                        <td>{{b.completed ? "Подтверждено" : "Не подтверждено"}}</td>\n                        <td>\n                            <button ng-if="b.completed == false && b.goods.quantity != 0 && !vm.isAdmin()"\n                                    ng-click="vm.confirm(b.idBuy)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-ok"></span> Подтвердить\n                            </button>\n                            <button ng-if="!b.completed && !vm.isAdmin()" ng-click="vm.remove(b.idBuy)" type="button"\n                                    class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n</div>';
 },{}],57:[function(require,module,exports){
 'use strict';
 
@@ -2289,7 +2330,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -2305,7 +2346,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -2324,7 +2365,7 @@ module.exports = [
                         vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так");
                         console.log(response.message);
@@ -2344,7 +2385,7 @@ module.exports = [
                         vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так");
                         console.log(response.message);
@@ -2356,6 +2397,7 @@ module.exports = [
             purchaseService.getAll()
                 .then(function (purchases) {
                     vm.purchases = purchases.data;
+                    flashService.hideLoading();
                 });
         }
 
@@ -2386,7 +2428,7 @@ module.exports = [
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -2413,7 +2455,7 @@ module.exports = [
                     if (count.success) {
                         vm.countOfNonComplete = count.data;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(count.message);
                     }
@@ -2452,7 +2494,8 @@ angular
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -2471,8 +2514,9 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/purchases/user').then(handleSuccess,
-                handleError('Ошибка при получении всех заказов на поставку'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/purchases/user')
+                .then(handleSuccess, handleError('Ошибка при получении всех заказов на поставку'));
         }
 
         function getCountOfNonConfirm() {
@@ -2517,7 +2561,7 @@ module.exports = [
     }
 ];
 },{}],61:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li>\n                    <a href="#/buys"><i class="fa fa-history" aria-hidden="true"></i>История поставок\n                        <span ng-if="vm.countOfNonComplete > 0" class="badge">\n                            {{vm.countOfNonComplete}}\n                        </span>\n                    </a>\n                </li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Заказы:</div>\n\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по товару:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="clientSearch">Поиск по клиенту:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="clientSearch" ng-model="search.client.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="frequencySearch">Поиск по периодичности: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="frequencySearch" ng-model="search.frequency">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Товар</th>\n                        <th>Клиент</th>\n                        <th>Периодичность (раз в n дней)</th>\n                        <th>Размер поставки(шт.)</th>\n                        <th>Статус</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="p in vm.purchases | filter:search:strict"\n                        class="{{p.confirmed == false && p.goods.quantity === 0 ? \'danger\' : (\n                        (p.confirmed == false && p.goods.quantity != 0) ||\n                        (p.confirmed == true && p.goods.quantity === 0) ? \'warning\' : \'success\'\n                        )}}">\n                        <td>{{p.goods.name}}</td>\n                        <td>{{p.client.name}}</td>\n                        <td>{{p.frequency}}</td>\n                        <td>{{p.quantity}}</td>\n                        <td>{{p.confirmed ? "Подтверждено" : "Не подтверждено"}}</td>\n                        <td>\n                            <button ng-if="p.confirmed == false && p.goods.quantity != 0 && vm.isAdmin()"\n                                    ng-click="vm.confirm(p.idPurchase)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-ok"></span> Подтвердить\n                            </button>\n                            <button ng-if="!vm.isAdmin()" ng-click="vm.showEditForm(p)" ctype="button"\n                                    class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-if="p.goods.quantity === 0 && vm.isAdmin()" ng-click="vm.showOrderForm(p.goods)"\n                                    ctype="button"\n                                    class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#orderSupply">\n                                <span class="glyphicon glyphicon-download"></span> Заказать товар на склад\n                            </button>\n                            <button ng-click="vm.remove(p.idPurchase)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-if="!isAdmin()" ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg"\n                    data-toggle="modal"\n                    data-target="#myModal">\n                Создать заказ на поставки\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="orderSupply" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">Заказать</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Поставщик</label>\n                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"\n                                required>\n                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>\n                        </select>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.address.$dirty && form.address.$error.required }">\n                        <label for="supplier">Склад</label>\n                        <br/>\n                        <label ng-repeat="a in vm.addresses" class="radio-inline">\n                            <input value="{{a.idAddress}}" name="address" type="radio" ng-model="vm.newSupply.address">\n                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}\n                        </label>\n                        <span ng-show="form.address.$dirty && form.address.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantity">Количество</label>\n                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"\n                               ng-model="vm.newSupply.quantity" required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.goods.$dirty && form.goods.$error.required }">\n                        <label for="goods">Товар</label>\n                        <select class="form-control" id="goods" name="goods" ng-model="vm.newPurchase.goods"\n                                required>\n                            <option ng-repeat="g in vm.goods" value="{{g.idGoods}}">{{g.name}}</option>\n                        </select>\n                        <span ng-show="form.goods.$dirty && form.goods.$error.required" class="help-block">Товара - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.frequency.$dirty && form.frequency.$error.required }">\n                        <label for="frequency">Частота</label>\n                        <input type="number" name="frequency" id="frequency" class="form-control"\n                               ng-model="vm.newPurchase.frequency"\n                               required/>\n                        <span ng-show="form.frequency.$dirty && form.frequency.$error.required"\n                              class="help-block">Периодичность - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantityPur">Размер заказов</label>\n                        <input type="text" name="quantity" id="quantityPur" class="form-control"\n                               ng-model="vm.newPurchase.quantity"\n                               required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required"\n                              class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li>\n                    <a href="#/buys"><i class="fa fa-history" aria-hidden="true"></i>История поставок\n                        <span ng-if="vm.countOfNonComplete > 0" class="badge">\n                            {{vm.countOfNonComplete}}\n                        </span>\n                    </a>\n                </li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Заказы:</div>\n\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по товару:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.goods.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="clientSearch">Поиск по клиенту:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="clientSearch" ng-model="search.client.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="frequencySearch">Поиск по периодичности: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="frequencySearch" ng-model="search.frequency">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="quantitySearch">Поиск по количеству: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="quantitySearch" ng-model="search.quantity">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Товар</th>\n                        <th>Клиент</th>\n                        <th>Периодичность (раз в n дней)</th>\n                        <th>Размер поставки(шт.)</th>\n                        <th>Статус</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="p in vm.purchases | filter:search:strict"\n                        class="{{p.confirmed == false && p.goods.quantity === 0 ? \'danger\' : (\n                        (p.confirmed == false && p.goods.quantity != 0) ||\n                        (p.confirmed == true && p.goods.quantity === 0) ? \'warning\' : \'success\'\n                        )}}">\n                        <td>{{p.goods.name}}</td>\n                        <td>{{p.client.name}}</td>\n                        <td>{{p.frequency}}</td>\n                        <td>{{p.quantity}}</td>\n                        <td>{{p.confirmed ? "Подтверждено" : "Не подтверждено"}}</td>\n                        <td>\n                            <button ng-if="p.confirmed == false && p.goods.quantity != 0 && vm.isAdmin()"\n                                    ng-click="vm.confirm(p.idPurchase)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-ok"></span> Подтвердить\n                            </button>\n                            <button ng-if="!vm.isAdmin()" ng-click="vm.showEditForm(p)" ctype="button"\n                                    class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#myModal">\n                                <span class="glyphicon glyphicon-edit"></span> Редактировать\n                            </button>\n                            <button ng-if="p.goods.quantity === 0 && vm.isAdmin()" ng-click="vm.showOrderForm(p.goods)"\n                                    ctype="button"\n                                    class="btn btn-default btn-sm"\n                                    data-toggle="modal" data-target="#orderSupply">\n                                <span class="glyphicon glyphicon-download"></span> Заказать товар на склад\n                            </button>\n                            <button ng-click="vm.remove(p.idPurchase)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <button ng-if="!isAdmin()" ng-click="vm.showCreationForm()" ctype="button" class="btn btn-info btn-lg"\n                    data-toggle="modal"\n                    data-target="#myModal">\n                Создать заказ на поставки\n            </button>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n\n        </div>\n    </div>\n    <div class="modal fade" id="orderSupply" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">Заказать</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.supplier.$dirty && form.supplier.$error.required }">\n                        <label for="supplier">Поставщик</label>\n                        <select class="form-control" id="supplier" name="supplier" ng-model="vm.newSupply.supplier"\n                                required>\n                            <option ng-repeat="s in vm.suppliers" value="{{s.idSupplier}}">{{s.name}}</option>\n                        </select>\n                        <span ng-show="form.supplier.$dirty && form.supplier.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.address.$dirty && form.address.$error.required }">\n                        <label for="supplier">Склад</label>\n                        <br/>\n                        <label ng-repeat="a in vm.addresses" class="radio-inline">\n                            <input value="{{a.idAddress}}" name="address" type="radio" ng-model="vm.newSupply.address">\n                            {{a.country}}, {{a.city}}, {{a.street}} {{a.number}}\n                        </label>\n                        <span ng-show="form.address.$dirty && form.address.$error.required"\n                              class="help-block">Поставщик - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantity">Количество</label>\n                        <input type="number" min="0" name="quantity" id="quantity" class="form-control"\n                               ng-model="vm.newSupply.quantity" required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required" class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n    <div class="modal fade" id="myModal" role="dialog">\n        <div class="modal-dialog">\n\n            <!-- Modal content-->\n            <div class="modal-content">\n                <div class="modal-header">\n                    <button type="button" class="close" data-dismiss="modal">&times;</button>\n                    <h4 class="modal-title">{{vm.creationForm ? "Добавление" : "Редактирование"}}</h4>\n                </div>\n                <form name="form" ng-submit="vm.formAction()" role="form"\n                      style="padding-left: 10px; padding-right: 10px">\n                    <div class="form-group" ng-class="{ \'has-error\': form.goods.$dirty && form.goods.$error.required }">\n                        <label for="goods">Товар</label>\n                        <select class="form-control" id="goods" name="goods" ng-model="vm.newPurchase.goods"\n                                required>\n                            <option ng-repeat="g in vm.goods" value="{{g.idGoods}}">{{g.name}}</option>\n                        </select>\n                        <span ng-show="form.goods.$dirty && form.goods.$error.required" class="help-block">Товара - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.frequency.$dirty && form.frequency.$error.required }">\n                        <label for="frequency">Частота</label>\n                        <input type="number" name="frequency" id="frequency" class="form-control"\n                               ng-model="vm.newPurchase.frequency"\n                               required/>\n                        <span ng-show="form.frequency.$dirty && form.frequency.$error.required"\n                              class="help-block">Периодичность - обязательное поле</span>\n                    </div>\n                    <div class="form-group"\n                         ng-class="{ \'has-error\': form.quantity.$dirty && form.quantity.$error.required }">\n                        <label for="quantityPur">Размер заказов</label>\n                        <input type="text" name="quantity" id="quantityPur" class="form-control"\n                               ng-model="vm.newPurchase.quantity"\n                               required/>\n                        <span ng-show="form.quantity.$dirty && form.quantity.$error.required"\n                              class="help-block">Количество - обязательное поле</span>\n                    </div>\n                    <div class="modal-footer">\n                        <button ng-click="vm.formAction()" type="submit" class="btn btn-default" data-dismiss="modal">\n                            Принять\n                        </button>\n                    </div>\n                </form>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n';
 },{}],62:[function(require,module,exports){
 'use strict';
 
@@ -2560,7 +2604,7 @@ module.exports = [
                         flashService.Success('Регистрация прошла успешно!', true);
                         $location.path('/login');
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                     }
                 });
@@ -2612,7 +2656,7 @@ module.exports = [
             var checkAuth = function () {
 
                 if (toState.name === 'logout') {
-                    authService.ClearCredentials();
+                    authService.clearCredentials();
                     return redirect('login');
                 } else {
                     if (statesWithoutAuth.indexOf(toState.name) != -1) {
@@ -2756,7 +2800,7 @@ module.exports = [
                         flashService.Success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -2767,6 +2811,7 @@ module.exports = [
             userService.getAll()
                 .then(function (users) {
                     vm.allUsers = users.data;
+                    flashService.hideLoading();
                 });
         }
     }
@@ -2792,7 +2837,7 @@ angular
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./config":68,"./controller":69,"./user-profile":74,"./user-service":76,"./user-stat":79}],71:[function(require,module,exports){
-module.exports = '<div class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a href="#/user-stat"><span class="fa fa-bar-chart"></span>Статистика</a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <ul class="breadcrumb">\n                <li class="active">Пользователи</li>\n            </ul>\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Зарегистрированные пользователи:</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по имени:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="emailSearch">Поиск по email:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="emailSearch" ng-model="search.email">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="phoneSearch">Поиск по номеру телефона: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="phoneSearch" ng-model="search.phone">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="userSearch">Поиск по Username: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="userSearch" ng-model="search.username">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Название</th>\n                        <th>Контактный email</th>\n                        <th>Контактный телефон</th>\n                        <th>Username</th>\n                        <th>О клиенте</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="u in vm.allUsers | filter:search:strict">\n                        <td>{{u.name}}</td>\n                        <td>{{u.email}}</td>\n                        <td>{{u.phone}}</td>\n                        <td>{{u.username}}</td>\n                        <td>{{u.about}}</td>\n                        <td>\n                            <button ng-click="vm.remove(u.idUser)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n        </div>\n    </div>\n</div>\n';
+    module.exports = '<div id="container" class="container" style="margin-top:70px">\n    <div class="row">\n        <div class="col-sm-2">\n            <ul id="sidebar" class="nav nav-stacked affix">\n                <li><a href="#/user-stat"><span class="fa fa-bar-chart"></span>Статистика</a></li>\n            </ul>\n        </div>\n        <div class="col-sm-10">\n            <ul class="breadcrumb">\n                <li class="active">Пользователи</li>\n            </ul>\n            <div ng-class="{ \'alert\': flash, \'alert-success\': flash.type === \'success\', \'alert-danger\': flash.type === \'error\' }"\n                 ng-if="flash" ng-bind="flash.message"></div>\n            <div class="panel panel-default">\n                <!-- Default panel contents -->\n                <div class="panel-heading">Зарегистрированные пользователи:</div>\n                <div class="custom-search">\n                    <label for="nameSearch">Поиск по имени:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="nameSearch" ng-model="search.name">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="emailSearch">Поиск по email:</label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="emailSearch" ng-model="search.email">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="phoneSearch">Поиск по номеру телефона: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="phoneSearch" ng-model="search.phone">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                    <label for="userSearch">Поиск по Username: </label>\n                    <div class="input-group">\n                        <input type="text" placeholder="Поиск" class="form-control" id="userSearch" ng-model="search.username">\n                        <div class="input-group-btn">\n                            <button class="btn btn-default">\n                                <i class="glyphicon glyphicon-search"></i>\n                            </button>\n                        </div>\n                    </div>\n                </div>\n                <br>\n                <!-- Table -->\n                <table class="table table-hover">\n                    <thead>\n                    <tr>\n                        <th>Название</th>\n                        <th>Контактный email</th>\n                        <th>Контактный телефон</th>\n                        <th>Username</th>\n                        <th>О клиенте</th>\n                        <th></th>\n                    </tr>\n                    </thead>\n                    <tbody>\n                    <tr ng-repeat="u in vm.allUsers | filter:search:strict">\n                        <td>{{u.name}}</td>\n                        <td>{{u.email}}</td>\n                        <td>{{u.phone}}</td>\n                        <td>{{u.username}}</td>\n                        <td>{{u.about}}</td>\n                        <td>\n                            <button ng-click="vm.remove(u.idUser)" type="button" class="btn btn-default btn-sm">\n                                <span class="glyphicon glyphicon-remove"></span> Удалить\n                            </button>\n                        </td>\n                    </tr>\n                    </tbody>\n                </table>\n            </div>\n            <img ng-if="vm.dataLoading"\n                 src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="/>\n        </div>\n    </div>\n</div>\n';
 },{}],72:[function(require,module,exports){
 'use strict';
 
@@ -2826,8 +2871,8 @@ module.exports = [
         vm.user = {};
         vm.dataLoading = false;
         vm.password = {};
-        vm.changePassword = changePassword;
 
+        vm.changePassword = changePassword;
         vm.edit = edit;
 
         initController();
@@ -2853,7 +2898,7 @@ module.exports = [
                         loadUser();
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -2865,11 +2910,11 @@ module.exports = [
             userService.changePassword(vm.user, vm.password)
                 .then(function (response) {
                     if (response.success) {
-                        authService.ClearCredentials();
+                        authService.clearCredentials();
                         vm.dataLoading = false;
                         $location.path('/login');
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -2897,7 +2942,8 @@ module.exports = '<nav class="navbar navbar-inverse sidebar" role="navigation" s
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -2916,13 +2962,15 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/role/users').then(handleSuccess,
-                handleError('Ошибка при получении всех пользователей'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/role/users')
+                .then(handleSuccess, handleError('Ошибка при получении всех пользователей'));
         }
 
         function getCurrentUser() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/currentUser').then(handleSuccess,
-                handleError('Ошибка при получении текущего пользователя'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/currentUser')
+                .then(handleSuccess, handleError('Ошибка при получении текущего пользователя'));
         }
 
         function create(user) {

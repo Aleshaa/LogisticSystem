@@ -14,9 +14,9 @@ module.exports = [
 
         var userRole = "";
         var authStatus = true;
-        service.Login = Login;
-        service.SetCredentials = SetCredentials;
-        service.ClearCredentials = ClearCredentials;
+        service.login = login;
+        service.setCredentials = setCredentials;
+        service.clearCredentials = clearCredentials;
         service.isAuth = isAuth;
         service.getAuthUser = getAuthUser;
         service.getCurrentUser = getCurrentUser;
@@ -24,25 +24,21 @@ module.exports = [
 
         return service;
 
-        function Login(username, password, callback) {
+        function login(username, password, callback) {
             authStatus = false;
-            SetCredentials(username, password);
+            setCredentials(username, password);
             $http.get(REST_SERVICE_URI + '/rest/authenticate', {})
                 .success(function (response) {
                     userRole = response.role.nameRole;
-                    $rootScope.globals = {};
-                    localStorageService.remove('globals');
-                    $http.defaults.headers.common.Authorization = 'Basic';
-                    authStatus = true;
                     response = {success: true};
+                    authStatus = true;
+                    clearCredentials();
+                    console.info('success', response);
                     callback(response);
                 })
                 .error(function (response, status) {
                     response = {success: false, message: 'Имя пользователя или пароль неверны'};
-                    $rootScope.globals = {};
-                    localStorageService.remove('globals');
-                    console.log("ОЧИСТИЛИ ГЛОБАЛС");
-                    $http.defaults.headers.common.Authorization = 'Basic';
+                    clearCredentials();
                     console.error('error', status, response);
                     callback(response);
                 });
@@ -55,13 +51,13 @@ module.exports = [
                     if (response.success) {
                         return response.data;
                     } else {
-                        console.log("Что-то пошло не так");
+                        console.log("Error on getting current user");
                         return {};
                     }
                 });
         }
 
-        function SetCredentials(username, password) {
+        function setCredentials(username, password) {
             var encodedString = btoa(username + ':' + password);
 
 
@@ -89,12 +85,13 @@ module.exports = [
             var currentUser = {
                 role: ""
             };
-            if (localStorageService.get('globals'))
+            if (localStorageService.get('globals')) {
                 currentUser = localStorageService.get('globals').currentUser;
+            }
             return authRoles.indexOf(currentUser.role) != -1 || authRoles == [];
         }
 
-        function ClearCredentials() {
+        function clearCredentials() {
             $rootScope.globals = {};
             localStorageService.remove('globals');
             $http.defaults.headers.common.Authorization = 'Basic';

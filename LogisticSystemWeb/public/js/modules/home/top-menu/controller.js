@@ -1,18 +1,24 @@
 'use strict';
 
 module.exports = [
-    '$scope',
-    '$state',
     'authService',
     'userService',
     'purchaseService',
-    function ($scope, $state, authService, userService, purchaseService) {
+    function (authService, userService, purchaseService) {
 
-        $scope.isCollapsed = true;
-        $scope.authStatus = false;
+        var vm = this;
         var flag = false;
-        $scope.countNonConfirmPurchases = 0;
-        $scope.user = {};
+
+        vm.refresh = refresh;
+        vm.isAuth = isAuth;
+        vm.isAdmin = isAdmin;
+        vm.isUser = isUser;
+        vm.logout = logout;
+
+        vm.isCollapsed = true;
+        vm.authStatus = false;
+        vm.countNonConfirmPurchases = 0;
+        vm.user = {};
 
         setTimeout(initController(), 1000);
 
@@ -22,16 +28,18 @@ module.exports = [
         }
 
         function getCurrentUser() {
+            console.log("Get current user function called");
             userService.getCurrentUser()
                 .then(function (user) {
-                    if(user.success)
-                        $scope.user = user.data;
+                    if (user.success) {
+                        vm.user = user.data;
+                        console.log("Current user: " + user.data);
+                    }
                     else {
-                        $scope.authStatus = false;
+                        vm.authStatus = false;
                         flag = false;
-                        getCurrentUser();
-                        getCountOfNonConfirm();
-                        authService.ClearCredentials();
+                        console.log(user.message);
+                        authService.clearCredentials();
                     }
                 });
         }
@@ -40,45 +48,43 @@ module.exports = [
             purchaseService.getCountOfNonConfirm()
                 .then(function (count) {
                     if (count.success) {
-                        $scope.countNonConfirmPurchases = count.data;
+                        vm.countNonConfirmPurchases = count.data;
                     } else {
                         console.log(count.message);
                     }
                 });
         }
 
-        $scope.refresh = function () {
+        function refresh() {
             getCurrentUser();
             getCountOfNonConfirm();
-        };
+        }
 
-        $scope.isAuth = function () {
-            if (!$scope.authStatus) {
-                $scope.authStatus = authService.isAuth();
+        function isAuth() {
+            if (!vm.authStatus) {
+                vm.authStatus = authService.isAuth();
             }
-            if ($scope.authStatus && !flag) {
+            if (vm.authStatus && !flag) {
                 getCurrentUser();
                 getCountOfNonConfirm();
                 flag = true;
             }
-            return $scope.authStatus;
-        };
+            return vm.authStatus;
+        }
 
-        $scope.isAdmin = function () {
+        function isAdmin() {
             return authService.checkRole(['ADMIN']);
-        };
+        }
 
-        $scope.isUser = function () {
+        function isUser() {
             return authService.checkRole(['USER']);
-        };
+        }
 
-        $scope.logout = function () {
-            $scope.authStatus = false;
+        function logout() {
+            vm.authStatus = false;
             flag = false;
-            getCurrentUser();
-            getCountOfNonConfirm();
-            return authService.ClearCredentials();
-        };
+            return authService.clearCredentials();
+        }
 
     }
 ];

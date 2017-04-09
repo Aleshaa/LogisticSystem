@@ -35,7 +35,12 @@ public class HibernateConfiguration {
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(environment.getRequiredProperty("jdbc.driverClassName"));
-        dataSource.setUrl(environment.getRequiredProperty("jdbc.url"));
+        StringBuilder url = new StringBuilder(environment.getRequiredProperty("jdbc.url"));
+        if (Boolean.valueOf(environment.getRequiredProperty("jdbc.useUnicode"))) {
+            url.append("?");
+            url.append(environment.getRequiredProperty("jdbc.characterEncoding"));
+        }
+        dataSource.setUrl(url.toString());
         dataSource.setUsername(environment.getRequiredProperty("jdbc.username"));
         dataSource.setPassword(environment.getRequiredProperty("jdbc.password"));
         return dataSource;

@@ -92,10 +92,10 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -108,10 +108,10 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -125,12 +125,12 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.creationForm = false;
                         vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так");
                         console.log(response.message);
@@ -145,12 +145,12 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.editionForm = false;
                         vm.newPurchase = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так");
                         console.log(response.message);
@@ -162,6 +162,7 @@ module.exports = [
             purchaseService.getAll()
                 .then(function (purchases) {
                     vm.purchases = purchases.data;
+                    flashService.hideLoading();
                 });
         }
 
@@ -186,13 +187,13 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllPurchases();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.orderForm = false;
                         vm.currentGoods = {};
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -219,7 +220,7 @@ module.exports = [
                     if (count.success) {
                         vm.countOfNonComplete = count.data;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(count.message);
                     }

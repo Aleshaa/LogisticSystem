@@ -67,7 +67,7 @@ public class ScheduleService {
             } else
                 LOGGER.info("Еще не настало время");
         }
-        LOGGER.info("Проверка осуществляется каждый чак. Текущее время :: " + new Date());
+        LOGGER.info("Проверка осуществляется каждый чаc. Текущее время :: " + new Date());
     }
 
 }

@@ -11,8 +11,8 @@ module.exports = [
         vm.user = {};
         vm.dataLoading = false;
         vm.password = {};
-        vm.changePassword = changePassword;
 
+        vm.changePassword = changePassword;
         vm.edit = edit;
 
         initController();
@@ -38,7 +38,7 @@ module.exports = [
                         loadUser();
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -50,11 +50,11 @@ module.exports = [
             userService.changePassword(vm.user, vm.password)
                 .then(function (response) {
                     if (response.success) {
-                        authService.ClearCredentials();
+                        authService.clearCredentials();
                         vm.dataLoading = false;
                         $location.path('/login');
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }

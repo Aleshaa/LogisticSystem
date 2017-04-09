@@ -3,11 +3,11 @@
 module.exports = [
     '$scope',
     'userService',
-    function ($scope, UserService) {
+    'flashService',
+    function ($scope, UserService, flashService) {
         var vm = this;
 
         vm.user = null;
-        vm.allUsers = [];
 
         initController();
 
@@ -19,6 +19,7 @@ module.exports = [
             UserService.getCurrentUser()
                 .then(function (user) {
                     vm.user = user.data;
+                    flashService.hideLoading();
                 });
         }
     }

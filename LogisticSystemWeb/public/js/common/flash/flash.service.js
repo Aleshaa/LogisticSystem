@@ -7,8 +7,10 @@ module.exports = [
     function ($rootScope) {
         var service = {};
 
-        service.Success = Success;
-        service.Error = Error;
+        service.success = success;
+        service.error = error;
+        service.showLoading = showLoading;
+        service.hideLoading = hideLoading;
 
         initService();
 
@@ -25,14 +27,13 @@ module.exports = [
                     if (!flash.keepAfterLocationChange) {
                         delete $rootScope.flash;
                     } else {
-                        // only keep for a single location change
                         flash.keepAfterLocationChange = false;
                     }
                 }
             }
         }
 
-        function Success(message, keepAfterLocationChange) {
+        function success(message, keepAfterLocationChange) {
             $rootScope.flash = {
                 message: message,
                 type: 'success',
@@ -40,12 +41,22 @@ module.exports = [
             };
         }
 
-        function Error(message, keepAfterLocationChange) {
+        function error(message, keepAfterLocationChange) {
             $rootScope.flash = {
                 message: message,
                 type: 'error',
                 keepAfterLocationChange: keepAfterLocationChange
             };
+        }
+
+        function showLoading() {
+            $("#container").hide();
+            $("#loading").show();
+        }
+
+        function hideLoading() {
+            $("#container").show();
+            $("#loading").hide();
         }
     }
 ];

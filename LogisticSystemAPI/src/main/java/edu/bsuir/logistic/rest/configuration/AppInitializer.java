@@ -1,5 +1,8 @@
 package edu.bsuir.logistic.rest.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 import javax.servlet.Filter;
@@ -12,7 +15,6 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
     public void onStartup(ServletContext servletContext) throws ServletException {
         super.onStartup(servletContext);
         servletContext.setInitParameter("spring.profiles.active", "dev");
-
     }
 
     @Override

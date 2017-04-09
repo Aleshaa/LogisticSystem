@@ -19,10 +19,10 @@ module.exports = [
             userService.create(vm.user)
                 .then(function (response) {
                     if (response.success) {
-                        flashService.Success('Регистрация прошла успешно!', true);
+                        flashService.success('Регистрация прошла успешно!', true);
                         $location.path('/login');
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                     }
                 });

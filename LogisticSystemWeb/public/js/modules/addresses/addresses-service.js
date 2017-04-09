@@ -3,7 +3,8 @@
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -23,23 +24,27 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/addresses').then(handleSuccess,
-                handleError('Ошибка при получении всех адресов'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/addresses')
+                .then(handleSuccess, handleError('Ошибка при получении всех адресов'));
         }
 
         function getAllStores() {
+            flashService.showLoading();
             return $http.get(REST_SERVICE_URI + 'rest/get/stores')
                 .then(handleSuccess, handleError('Ошибка при получении всех складов'));
         }
 
         function getAllAddresses() {
+            flashService.showLoading();
             return $http.get(REST_SERVICE_URI + 'rest/get/addresses/user')
                 .then(handleSuccess, handleError('Ошибка при получении всех складов'));
         }
 
         function getStoresForCurrentGoods(id) {
-            return $http.get(REST_SERVICE_URI + 'rest/get/addresses/cur/goods/' + id).then(handleSuccess,
-                handleError('Ошибка при получении всех адресов для опредленного товара'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/addresses/cur/goods/' + id)
+                .then(handleSuccess, handleError('Ошибка при получении всех адресов для опредленного товара'));
         }
 
         function create(newAddress, idUser) {

@@ -57,10 +57,10 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllStores();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -72,12 +72,12 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllStores();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                         vm.creationForm = false;
                         vm.newStore = {};
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -89,12 +89,12 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllStores();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                         vm.editionForm = false;
                         vm.newStore = {};
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -105,6 +105,7 @@ module.exports = [
             addressService.getAllAddresses()
                 .then(function (stores) {
                     vm.stores = stores.data;
+                    flashService.hideLoading();
                 });
         }
 

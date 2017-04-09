@@ -54,10 +54,10 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllSuppliers();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -71,10 +71,10 @@ module.exports = [
                         loadAllSuppliers();
                         vm.creationForm = false;
                         vm.newSupplier = {};
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -88,10 +88,10 @@ module.exports = [
                         loadAllSuppliers();
                         vm.editionForm = false;
                         vm.newSupplier = {};
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -102,6 +102,7 @@ module.exports = [
             supplierService.getAll()
                 .then(function (suppliers) {
                     vm.suppliers = suppliers.data;
+                    flashService.hideLoading();
                 });
         }
     }

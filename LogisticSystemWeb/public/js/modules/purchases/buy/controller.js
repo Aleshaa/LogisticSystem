@@ -30,10 +30,10 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllBuys();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -46,10 +46,10 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllBuys();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -60,6 +60,7 @@ module.exports = [
             buyService.getAll()
                 .then(function (buys) {
                     vm.buys = buys.data;
+                    flashService.hideLoading();
                 });
         }
     }

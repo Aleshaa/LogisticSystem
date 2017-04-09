@@ -65,7 +65,7 @@ module.exports = [
                         loadAllSupplies();
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -80,8 +80,11 @@ module.exports = [
             delete vm.newSupply.supplier;
             delete vm.newSupply.address;
             var date = new Date();
-            vm.newSupply.date = date.getFullYear() + "-" +
-                ((date.getMonth() + 1) < 10 ? ("0" + (date.getMonth() + 1)) : (date.getMonth() + 1)) + "-" +
+            vm.newSupply.date =
+                date.getFullYear()
+                + "-" +
+                ((date.getMonth() + 1) < 10 ? ("0" + (date.getMonth() + 1)) : (date.getMonth() + 1))
+                + "-" +
                 (date.getDate() < 10 ? ("0" + date.getDate()) : date.getDate());
             supplyService.create(vm.newSupply, idSupplier, idGoods, idAddress)
                 .then(function (response) {
@@ -91,7 +94,7 @@ module.exports = [
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -107,7 +110,7 @@ module.exports = [
                         vm.newSupply = {};
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log(response.message)
                     }
@@ -132,6 +135,7 @@ module.exports = [
             supplierService.getAll()
                 .then(function (suppliers) {
                     vm.suppliers = suppliers.data;
+                    flashService.hideLoading();
                 });
         }
 

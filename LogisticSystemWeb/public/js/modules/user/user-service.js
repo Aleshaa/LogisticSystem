@@ -3,7 +3,8 @@
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -22,13 +23,15 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/role/users').then(handleSuccess,
-                handleError('Ошибка при получении всех пользователей'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/role/users')
+                .then(handleSuccess, handleError('Ошибка при получении всех пользователей'));
         }
 
         function getCurrentUser() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/currentUser').then(handleSuccess,
-                handleError('Ошибка при получении текущего пользователя'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/currentUser')
+                .then(handleSuccess, handleError('Ошибка при получении текущего пользователя'));
         }
 
         function create(user) {

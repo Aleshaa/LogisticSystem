@@ -3,7 +3,8 @@
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -22,8 +23,9 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/purchases/user').then(handleSuccess,
-                handleError('Ошибка при получении всех заказов на поставку'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/purchases/user')
+                .then(handleSuccess, handleError('Ошибка при получении всех заказов на поставку'));
         }
 
         function getCountOfNonConfirm() {

@@ -26,10 +26,10 @@ module.exports = [
                 .then(function (response) {
                     if (response.success) {
                         loadAllUsers();
-                        flashService.Success(response.message);
+                        flashService.success(response.message);
                         vm.dataLoading = false;
                     } else {
-                        flashService.Error(response.message);
+                        flashService.error(response.message);
                         vm.dataLoading = false;
                         console.log("Что-то пошло не так")
                     }
@@ -40,6 +40,7 @@ module.exports = [
             userService.getAll()
                 .then(function (users) {
                     vm.allUsers = users.data;
+                    flashService.hideLoading();
                 });
         }
     }

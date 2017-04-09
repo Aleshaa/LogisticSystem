@@ -3,7 +3,8 @@
 module.exports = [
     '$http',
     'localStorageService',
-    function ($http, localStorageService) {
+    'flashService',
+    function ($http, localStorageService, flashService) {
         var service = {};
 
         var REST_SERVICE_URI = 'http://localhost:8080/';
@@ -21,8 +22,9 @@ module.exports = [
         return service;
 
         function getAll() {
-            return $http.get(REST_SERVICE_URI + 'rest/get/goods').then(handleSuccess,
-                handleError('Ошибка при получении всех товаров'));
+            flashService.showLoading();
+            return $http.get(REST_SERVICE_URI + 'rest/get/goods')
+                .then(handleSuccess, handleError('Ошибка при получении всех товаров'));
         }
 
         function create(newGoods) {

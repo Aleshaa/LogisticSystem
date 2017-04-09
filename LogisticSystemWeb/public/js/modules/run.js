@@ -25,7 +25,7 @@ module.exports = [
             var checkAuth = function () {
 
                 if (toState.name === 'logout') {
-                    authService.ClearCredentials();
+                    authService.clearCredentials();
                     return redirect('login');
                 } else {
                     if (statesWithoutAuth.indexOf(toState.name) != -1) {

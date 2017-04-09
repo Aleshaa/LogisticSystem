@@ -23,9 +23,6 @@ import java.util.Set;
 
 import static edu.bsuir.logistic.rest.model.RolesEnum.ADMIN;
 
-/**
- * Created by Alesha on 07.11.2016.
- */
 @RestController
 public class PurchaseController {
 
@@ -40,8 +37,6 @@ public class PurchaseController {
     @Autowired
     GoodsService goodsService;
 
-    //-------------------Retrieve All Purchases--------------------------------------------------------
-
     @RequestMapping(value = "/rest/get/purchases", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Purchase>> listAllPurchases() {
@@ -51,8 +46,6 @@ public class PurchaseController {
         }
         return new ResponseEntity<>(purchases, HttpStatus.OK);
     }
-
-    //-------------------Retrieve All Purchases For Current User--------------------------------------------------------
 
     @RequestMapping(value = "/rest/get/purchases/user", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
@@ -73,8 +66,6 @@ public class PurchaseController {
         return new ResponseEntity<>(listPurchases, HttpStatus.OK);
     }
 
-    //-------------------Retrieve All Confirmed Purchases--------------------------------------------------------
-
     @RequestMapping(value = "/rest/get/purchases/confirm", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Purchase>> listAllConfirmedPurchases() {
@@ -84,8 +75,6 @@ public class PurchaseController {
         }
         return new ResponseEntity<>(purchases, HttpStatus.OK);
     }
-
-    //-------------------Retrieve All Confirmed Purchases For Current Client-------------------------------------------
 
     @RequestMapping(value = "/rest/get/purchases/confirm/user", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
@@ -110,8 +99,6 @@ public class PurchaseController {
         return new ResponseEntity<>(listPurchases, HttpStatus.OK);
     }
 
-    //-------------------Retrieve All No Confirmed Purchases--------------------------------------------------------
-
     @RequestMapping(value = "/rest/get/purchases/noconfirm", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Purchase>> listAllUnconfirmedPurchases() {
@@ -121,8 +108,6 @@ public class PurchaseController {
         }
         return new ResponseEntity<>(purchases, HttpStatus.OK);
     }
-
-    //-------------------Retrieve All No Confirmed Purchases For Current Client----------------------------------------
 
     @RequestMapping(value = "/rest/get/purchases/noconfirm/user", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
@@ -147,8 +132,6 @@ public class PurchaseController {
         return new ResponseEntity<>(listPurchases, HttpStatus.OK);
     }
 
-    //-------------------Retrieve Count Of Non Confirm Purchases--------------------------------------------------------
-
     @RequestMapping(value = "/rest/get/purchases/noconfirm/size", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<Integer> sizeOfUnconfirmedPurchases() {
@@ -172,8 +155,6 @@ public class PurchaseController {
         return new ResponseEntity<>(listPurchases.size(), HttpStatus.OK);
     }
 
-    //-------------------Retrieve Single Purchase--------------------------------------------------------
-
     @RequestMapping(value = "/rest/get/purchase/{id}", method = RequestMethod.GET, produces = MediaType
             .APPLICATION_JSON_VALUE)
     public ResponseEntity<Purchase> getPurchase(@PathVariable("id") int id) {
@@ -185,9 +166,6 @@ public class PurchaseController {
         }
         return new ResponseEntity<>(purchase, HttpStatus.OK);
     }
-
-
-    //-------------------Create a Purchase--------------------------------------------------------
 
     @RequestMapping(value = "/rest/create/purchase/{idClient}/{idGoods}", method = RequestMethod.POST)
     public ResponseEntity<Void> createPurchase(@PathVariable("idClient") int idClient, @PathVariable("idGoods") int
@@ -208,9 +186,6 @@ public class PurchaseController {
         headers.setLocation(ucBuilder.path("/purchase/{id}").buildAndExpand(purchase.getIdPurchase()).toUri());
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
-
-
-    //------------------- Update a Purchase --------------------------------------------------------
 
     @RequestMapping(value = "/rest/update/purchase/{id}/{newGoods}", method = RequestMethod.PUT)
     public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id, 
@@ -238,8 +213,6 @@ public class PurchaseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //------------------- Change status of confirmation ----------------------------------------------------------
-
     @RequestMapping(value = "/rest/update/purchase/{id}/confirm", method = RequestMethod.PUT)
     public ResponseEntity<Void> updatePurchase(@PathVariable("id") int id) {
         System.out.println("Updating Purchase " + id);
@@ -257,8 +230,6 @@ public class PurchaseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //------------------- Delete a Address --------------------------------------------------------
-
     @RequestMapping(value = "/rest/delete/purchase/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<Purchase> deletePurchase(@PathVariable("id") int id) {
         System.out.println("Fetching & Deleting Purchase with id " + id);
@@ -272,9 +243,6 @@ public class PurchaseController {
         purchaseService.deletePurchaseById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
-    //------------------- Delete All Purchases --------------------------------------------------------
 
     @RequestMapping(value = "/rest/delete/purchases", method = RequestMethod.DELETE)
     public ResponseEntity<User> deleteAllPurchases() {

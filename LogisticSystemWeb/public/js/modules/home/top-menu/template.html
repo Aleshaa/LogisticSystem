@@ -1,8 +1,8 @@
-<div ng-show="isAuth()" class="container-fluid">
+<div id="top" ng-show="vm.isAuth()" class="container-fluid">
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="navbar-header">
             <button type="button"
-                    ng-click="isCollapsed = !isCollapsed"
+                    ng-click="isCollapsed = !vm.isCollapsed"
                     class="navbar-toggle collapsed">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -13,41 +13,42 @@
         </div>
         <div id="navbar"
              class="navbar-collapse collapse"
-             ng-class="{'text-align-center': !isCollapsed}"
+             ng-class="{'text-align-center': !vm.isCollapsed}"
              uib-collapse="isCollapsed">
             <ul class="nav navbar-nav navbar-right margin-right-5">
                 <li>
-                    <a ng-click="refresh()" ng-if="isAdmin()" href="#/users">
+                    <a ng-click="vm.refresh()" ng-if="vm.isAdmin()" href="#/users">
                         <i class="fa fa-users" aria-hidden="true"></i> Пользователи
                     </a>
                 </li>
-                <li><a ng-click="refresh()" href="#/goods"><i class="fa fa-shopping-bag"
-                                                              aria-hidden="true"></i>Товары</a></li>
-                <li><a ng-click="refresh()" ng-if="isAdmin()" href="#/addresses"><i class="fa fa-building-o"
-                                                                                    aria-hidden="true"></i>Склады</a>
+                <li><a ng-click="vm.refresh()" href="#/goods"><i class="fa fa-shopping-bag"
+                                                                 aria-hidden="true"></i>Товары</a></li>
+                <li><a ng-click="vm.refresh()" ng-if="vm.isAdmin()" href="#/addresses"><i class="fa fa-building-o"
+                                                                                          aria-hidden="true"></i>Склады</a>
                 </li>
-                <li><a ng-click="refresh()" ng-if="isUser()" href="#/addresses"><i class="fa fa-building-o"
-                                                                                   aria-hidden="true"></i>Магазины</a>
+                <li><a ng-click="vm.refresh()" ng-if="vm.isUser()" href="#/addresses"><i class="fa fa-building-o"
+                                                                                         aria-hidden="true"></i>Магазины</a>
                 </li>
                 <li>
-                    <a ng-click="refresh()" href="#/purchases">
+                    <a ng-click="vm.refresh()" href="#/purchases">
                         <i class="fa fa-shopping-cart" aria-hidden="true"></i> Заказы на поставку
-                        <span ng-if="countNonConfirmPurchases > 0" class="badge">{{countNonConfirmPurchases}}</span>
+                        <span ng-if="vm.countNonConfirmPurchases > 0"
+                              class="badge">{{vm.countNonConfirmPurchases}}</span>
                     </a>
                 </li>
-                <li ng-click="logout()">
-                    <a ng-if="isAdmin()" href="#/logout" class="cursor-pointer">
+                <li ng-click="vm.logout()">
+                    <a ng-if="vm.isAdmin()" href="#/logout" class="cursor-pointer">
                         <span class="glyphicon glyphicon-off"></span> Выйти
                     </a>
                 </li>
-                <li ng-if="isUser()" class="dropdown">
+                <li ng-if="vm.isUser()" class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">{{user.name}}<span class="caret"></span></a>
+                       aria-expanded="false">{{vm.user.name}}<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#/user-profile">
                             <i class="fa fa-user-o" aria-hidden="true"></i> Профиль</a></li>
                         <li role="separator" class="divider"></li>
-                        <li ng-click="logout()"><a href="#/logout"><span class="glyphicon glyphicon-off"></span>
+                        <li ng-click="vm.logout()"><a href="#/logout"><span class="glyphicon glyphicon-off"></span>
                             Выйти</a></li>
                     </ul>
                 </li>

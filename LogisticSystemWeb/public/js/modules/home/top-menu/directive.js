@@ -6,6 +6,7 @@ module.exports = [function () {
         replace: true,
         scope: true,
         controller: require('./controller'),
+        controllerAs: 'vm',
         template: require('./template.html')
     };
 }

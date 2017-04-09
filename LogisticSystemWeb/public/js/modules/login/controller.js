@@ -11,19 +11,19 @@ module.exports = [
         vm.login = login;
 
         (function initController() {
-            authenticationService.ClearCredentials();
+            authenticationService.clearCredentials();
         })();
 
         function login() {
             vm.dataLoading = true;
-            authenticationService.SetCredentials(vm.username, vm.password);
-            authenticationService.Login(vm.username, vm.password, function (response) {
+            //authenticationService.setCredentials(vm.username, vm.password);
+            authenticationService.login(vm.username, vm.password, function (response) {
                 if (response.success) {
-                    authenticationService.SetCredentials(vm.username, vm.password);
+                    authenticationService.setCredentials(vm.username, vm.password);
                     $location.path('/');
                 } else {
-                    authenticationService.ClearCredentials();
-                    flashService.Error(response.message);
+                    authenticationService.clearCredentials();
+                    flashService.error(response.message);
                     vm.dataLoading = false;
                 }
             });
